@@ -1,16 +1,22 @@
+var fs      = require('fs');
 var request = require('request');
 var express = require('express');
-var hbars = require('express-handlebars');
-var key = require('./config/key.js')
+var hbars   = require('express-handlebars');
 
 app = express();
 app.engine('handlebars', hbars({defaultLayout: 'main'}));
 app.set('view engine', 'handlebars');
 
-var user = "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=" + key + "&steamids=76561197964880220";
+var key;
+var userData;
+var steam = "https://api.steampowered.com"
 
 app.get('/', function(req, res) {
-  res.send(getUserData());
+  res.send(getUserData(steam + "/ISteamUser/GetPlayerSummaries/v0002/?key=" + key + "&steamids=76561197964880220"));
+})
+
+app.get('/steamIDForm', function(req, res) {
+
 })
 
 app.get('/disp', function(req, res) {
@@ -25,20 +31,55 @@ app.get('/disp', function(req, res) {
   });
 })
 
-var getUserData = function() {
+var getUserData = function(uri) {
   console.log("Requesting some data");
 
-  var data;
-
-  request(user, function(err, res, body) {
+  request(uri, function(err, res, body) {
     if (!err && res.statusCode === 200) {
-      data = body;
+      userData = JSON.parse(body);
     } else {
       console.log(err);
     }
-
-    console.log(data);
   });
 }
 
+var steamKeyCheck = function() {
+  console.log("Checking for a Steam API Key...");
+
+  var keyFile = 'config/key';
+
+  fs.exists(keyFile, function(exists) {
+    if (exists) {
+      console.log("...Key found. Fetching...");
+
+      fs.readFile(keyFile, function(err, data) {
+        if (!err) {
+          key = data.toString();
+
+          console.log("...Key fetched!");
+        }
+      });
+    } else {
+      var rl = require('readline-sync');
+
+      console.log("...Steam API Key not found!\nIf you don't have a key, get one at https://steamcommunity.com/dev.");
+
+      var newKey = rl.question("Enter your key: ");
+      
+      fs.writeFile(keyFile, newKey, function(err) {
+        if (!err) {
+          console.log("Key has been set. Fetching...");
+
+          fs.readFile(keyFile, function(err, data) {
+            key = data.toString();
+
+            console.log("Key fetched!");
+          })
+        }
+      })
+    }
+  })
+}
+
+steamKeyCheck();
 app.listen(8080);
