@@ -1,0 +1,10 @@
+{
+  "name": "steam_sig_generator",
+  "version": "0.0.1",
+  "description": "uses steam api to generate a customaizable steam profile image",
+  "dependancies": {
+    "express": "^4.13.3",
+    "express-handlebars": "^2.0.1",
+    "request": "^2.65.0"
+  }
+}
