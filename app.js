@@ -1,45 +1,62 @@
+var promise = require('bluebird');
 var fs      = require('fs');
 var request = require('request');
 var express = require('express');
 var hbars   = require('express-handlebars');
+var bparse  = require('body-parser');
 
 app = express();
+app.use(bparse.json()); 
+app.use(bparse.urlencoded({ extended: true })); 
 app.engine('handlebars', hbars({defaultLayout: 'main'}));
 app.set('view engine', 'handlebars');
 
 var key;
-var userData;
-var steam = "https://api.steampowered.com"
 
 app.get('/', function(req, res) {
-  res.send(getUserData(steam + "/ISteamUser/GetPlayerSummaries/v0002/?key=" + key + "&steamids=76561197964880220"));
-})
+  res.redirect('/steamIDForm');
+});
 
 app.get('/steamIDForm', function(req, res) {
+  res.render('form', {
+    title: "Enter Steam ID",
+  })
+});
 
-})
+app.get('/form-handler', function(req, res) {
+  console.log(req.query.SteamID);
+});
 
-app.get('/disp', function(req, res) {
-  request(user, function(err, resp, body) {
-    if (!err && res.statusCode === 200) {
-      body = JSON.parse(body);
-      console.log("Hit!");
-      res.send(body.response.players);
-    } else {
-      console.log(err);
-    }
+app.get('/display', function(req, res) {
+  console.log("A user wants data on profile " + req.query.steamid);
+  getUserData(buildURI(key, req.query.steamid)).then(function(userInfo) {
+    res.render('profileDisplay', {
+      title: userInfo.personaname,
+      avatar: userInfo.avatarfull,
+    })
+
+    console.log("Sent profile information: " + userInfo.personaname + '\n');
   });
-})
+  
+});
+
+var buildURI = function(APIkey, SteamID) {
+  return "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key="
+    + APIkey + "&steamids=" + SteamID;
+}
 
 var getUserData = function(uri) {
   console.log("Requesting some data");
 
-  request(uri, function(err, res, body) {
-    if (!err && res.statusCode === 200) {
-      userData = JSON.parse(body);
-    } else {
-      console.log(err);
-    }
+  return new promise(function(resolve, reject) {
+    request(uri, function(err, res, body) {
+      if (!err && res.statusCode === 200) {
+        var userData = JSON.parse(body);
+        resolve(userData.response.players[0]);
+      } else {
+        reject(err);
+      }
+    });
   });
 }
 
@@ -82,4 +99,5 @@ var steamKeyCheck = function() {
 }
 
 steamKeyCheck();
-app.listen(8080);
+app.listen(3000);
+console.log("App started listening on port 3000.");
