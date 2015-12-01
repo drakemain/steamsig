@@ -6,6 +6,10 @@
     "express": "^4.13.3",
     "express-handlebars": "^2.0.1",
     "request": "^2.65.0",
-    "readline-sync": "^1.2.21" //temporary
+    "readline-sync": "^1.2.21",
+    "body-parser": "^1.14.1"
+  },
+  "dependencies": {
+    "bluebird": "^3.0.5"
   }
 }
