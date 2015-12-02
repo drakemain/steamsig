@@ -106,6 +106,8 @@ var steamKeyCheck = function() {
             })
           }
         })
+        
+      rl.close();
       })
     }
   })
