@@ -18,7 +18,7 @@ app.get('/', function(req, res) {
     res.redirect('/steamIDForm');
   } else {
     res.send("No steam key has been set! A steam API Key" +
-      "must be set before API calls can be made.");
+      " must be set before API calls can be made.");
   }
 });
 
@@ -83,23 +83,29 @@ var steamKeyCheck = function() {
           console.log("...Key fetched!");
         }
       });
+
     } else {
-      var rl = require('readline-sync');
 
-      console.log("...Steam API Key not found!\nIf you don't have a key, get one at https://steamcommunity.com/dev.");
+      var readline = require('readline');
+      var rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+      });
 
-      var newKey = rl.question("Enter your key: ");
-      
-      fs.writeFile(keyFile, newKey, function(err) {
-        if (!err) {
-          console.log("Key has been set. Fetching...");
+      console.log("\n...Steam API Key not found!\nIf you don't have a key, get one at https://steamcommunity.com/dev.");
 
-          fs.readFile(keyFile, function(err, data) {
-            key = data.toString();
+      rl.question("Enter your steam API key: ", function(newKey) {
+        fs.writeFile(keyFile, newKey, function(err) {
+          if (!err) {
+            console.log("Key has been set. Fetching...");
 
-            console.log("Key fetched!");
-          })
-        }
+            fs.readFile(keyFile, function(err, data) {
+              key = data.toString();
+
+              console.log("Key fetched!");
+            })
+          }
+        })
       })
     }
   })
