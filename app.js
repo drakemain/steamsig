@@ -14,10 +14,17 @@ app.set('view engine', 'handlebars');
 var key;
 
 app.get('/', function(req, res) {
-  res.redirect('/steamIDForm');
+  if (key) {
+    res.redirect('/steamIDForm');
+  } else {
+    res.send("No steam key has been set! A steam API Key" +
+      "must be set before API calls can be made.");
+  }
 });
 
 app.get('/steamIDForm', function(req, res) {
+  console.log();
+
   res.render('form', {
     title: "Enter Steam ID",
   })
