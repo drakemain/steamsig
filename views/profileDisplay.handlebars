@@ -1,3 +1,21 @@
-<h2> {{title}} </h2>
+<h2> {{userInfo.personaname}} </h2>
 
-<img src="{{avatar}}" alt="{{title}}'s avatar">
+{{#if elements.avatar}}
+  <p><img src="{{userInfo.avatarfull}}" alt="{{userInfo.personaname}}'s avatar"></p>
+{{/if}}
+
+{{#if profileVisible}}
+  {{#if elements.realname}}
+    <p>{{userInfo.realname}}</p>
+  {{/if}}
+
+  {{#if elements.location}}
+    <p>{{userInfo.loccityid}}, {{userInfo.locstatecode}}, {{userInfo.loccountrycode}}</p>
+  {{/if}}
+
+  {{#if elements.personastate}}
+    {{userInfo.personastate}}
+  {{/if}}
+{{else}}
+  <p>Your profile is not public, so most items cannot be displayed.</p>
+{{/if}}

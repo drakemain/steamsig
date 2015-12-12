@@ -36,10 +36,51 @@ app.get('/form-handler', function(req, res) {
 
 app.get('/display', function(req, res) {
   console.log("A user wants data on profile " + req.query.steamid);
+
+  var element = req.query.element;
+  var elementsObj = {
+    realname: false,
+    location: false,
+    avatar: false,
+    personastate: false
+  };
+
+  if (element) {
+    if (typeof element === 'string') {
+      element = new Array(element);
+    };
+
+    for (var i in element) {
+      switch(element[i]) {
+        case 'realname':
+          elementsObj.realname = true;
+          break;
+        case 'location':
+          elementsObj.location = true;
+          break;
+        case 'avatar':
+          elementsObj.avatar = true;
+          break;
+        case 'personastate':
+          elementsObj.personastate = true;
+          break;
+      }
+    }
+  }
+
   getUserData(buildURI(key, req.query.steamid)).then(function(userInfo) {
+    console.log(typeof userInfo.communityvisibilitystate);
+    var profileVisibility = false;
+
+    if (userInfo.communityvisibilitystate === 3) {
+      profileVisibility = true;
+    }
+
     res.render('profileDisplay', {
-      title: userInfo.personaname,
-      avatar: userInfo.avatarfull,
+      title: userInfo.personaname + "'s Steam Profile",
+      profileVisible : profileVisibility,
+      userInfo: userInfo,
+      elements: elementsObj
     })
 
     console.log("Sent profile information: " + userInfo.personaname + '\n');
