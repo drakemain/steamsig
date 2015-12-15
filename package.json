@@ -1,12 +1,13 @@
 {
   "name": "steam_sig_generator",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "uses steam api to generate a customaizable steam profile image",
   "dependencies": {
+    "bluebird": "^3.0.5",
+    "body-parser": "^1.14.1",
     "express": "^4.13.3",
     "express-handlebars": "^2.0.1",
-    "request": "^2.65.0",
-    "body-parser": "^1.14.1",
-    "bluebird": "^3.0.5"
+    "gm": "^1.21.1",
+    "request": "^2.65.0"
   }
 }
