@@ -4,10 +4,13 @@ var request = require('request');
 var express = require('express');
 var hbars   = require('express-handlebars');
 var bparse  = require('body-parser');
+var path    = require('path');
+
+var imgProcess = require('./assets/js/imgProcess.js');
 
 app = express();
-app.use(bparse.json()); 
-app.use(bparse.urlencoded({ extended: true })); 
+app.use(bparse.json());
+app.use(bparse.urlencoded({ extended: true }));
 app.engine('handlebars', hbars({defaultLayout: 'main'}));
 app.set('view engine', 'handlebars');
 
@@ -76,12 +79,20 @@ app.get('/display', function(req, res) {
       profileVisibility = true;
     }
 
-    res.render('profileDisplay', {
+    var assets = {
+      background: 'assets/img/base-gray.png',
+      avatar: userInfo.avatarfull.replace("https", "http"),
+      name: userInfo.personaname
+    }
+
+    res.sendFile(__dirname + '/assets/img/test/test.png');
+
+    /*res.render('profileDisplay', {
       title: userInfo.personaname + "'s Steam Profile",
       profileVisible : profileVisibility,
       userInfo: userInfo,
       elements: elementsObj
-    })
+    })*/
 
     console.log("Sent profile information: " + userInfo.personaname + '\n');
   });
