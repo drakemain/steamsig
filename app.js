@@ -40,37 +40,6 @@ app.get('/form-handler', function(req, res) {
 app.get('/display', function(req, res) {
   console.log("A user wants data on profile " + req.query.steamid);
 
-  var element = req.query.element;
-  var elementsObj = {
-    realname: false,
-    location: false,
-    avatar: false,
-    personastate: false
-  };
-
-  if (element) {
-    if (typeof element === 'string') {
-      element = new Array(element);
-    };
-
-    for (var i in element) {
-      switch(element[i]) {
-        case 'realname':
-          elementsObj.realname = true;
-          break;
-        case 'location':
-          elementsObj.location = true;
-          break;
-        case 'avatar':
-          elementsObj.avatar = true;
-          break;
-        case 'personastate':
-          elementsObj.personastate = true;
-          break;
-      }
-    }
-  }
-
   getUserData(buildURI(key, req.query.steamid)).then(function(userInfo) {
     console.log(typeof userInfo.communityvisibilitystate);
     var profileVisibility = false;
@@ -85,8 +54,9 @@ app.get('/display', function(req, res) {
       name: userInfo.personaname
     }
 
-    res.sendFile(__dirname + '/assets/img/test/test.png');
-
+    imgProcess(assets, function() {
+      res.sendFile(__dirname + '/assets/img/test/test.png')
+    });
     /*res.render('profileDisplay', {
       title: userInfo.personaname + "'s Steam Profile",
       profileVisible : profileVisibility,
