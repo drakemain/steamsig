@@ -1,8 +1,9 @@
-var fs = require('fs'),
-    gm = require('gm');
+var fs    = require('fs'),
+    path  = require('path');
+    gm    = require('gm');
 
 module.exports = function (assets, callback) {
-  checkPathExists('assets/img/test');
+  checkPathExists('assets/img/profile/');
 
   gm()
     .in('-page', '+0+0')
@@ -13,7 +14,7 @@ module.exports = function (assets, callback) {
     .fontSize(28)
     .drawText(200, 28, assets.name)
     .flatten()
-    .write('assets/img/test/test.png', function(err) {
+    .write(path.join(assets.filePath, assets.fileName), function(err) {
       if (!err) {
         console.log('Merged images');
         callback();
@@ -26,6 +27,7 @@ function checkPathExists(path) {
   fs.access(path, function(err) {
     if (err && err.errno === -4058) {
       fs.mkdir(path)
+      console.log('Profile path created');
     }
   })
 }
