@@ -1,4 +1,5 @@
 var promise = require('bluebird');
+var path    = require('path');
 var fs      = require('fs');
 var request = require('request');
 var express = require('express');
@@ -38,10 +39,9 @@ app.get('/form-handler', function(req, res) {
 });
 
 app.get('/display', function(req, res) {
-  console.log("A user wants data on profile " + req.query.steamid);
-
+  console.log('Hit on route: /display. ' + req.query.steamid);
+;
   getUserData(buildURI(key, req.query.steamid)).then(function(userInfo) {
-    console.log(typeof userInfo.communityvisibilitystate);
     var profileVisibility = false;
 
     if (userInfo.communityvisibilitystate === 3) {
@@ -49,22 +49,18 @@ app.get('/display', function(req, res) {
     }
 
     var assets = {
+      fileName: req.query.steamid + '.png',
+      filePath: 'assets/img/profile/',
       background: 'assets/img/base-gray.png',
       avatar: userInfo.avatarfull.replace("https", "http"),
       name: userInfo.personaname
     }
 
     imgProcess(assets, function() {
-      res.sendFile(__dirname + '/assets/img/test/test.png')
+      res.sendFile(path.resolve(path.join(assets.filePath, assets.fileName)));
+      console.log("Sent profile information: " + userInfo.personaname + '\n');
     });
-    /*res.render('profileDisplay', {
-      title: userInfo.personaname + "'s Steam Profile",
-      profileVisible : profileVisibility,
-      userInfo: userInfo,
-      elements: elementsObj
-    })*/
-
-    console.log("Sent profile information: " + userInfo.personaname + '\n');
+    
   });
   
 });
@@ -80,6 +76,7 @@ var getUserData = function(uri) {
   return new promise(function(resolve, reject) {
     request(uri, function(err, res, body) {
       if (!err && res.statusCode === 200) {
+        console.log('Response recieved from Steam.')
         var userData = JSON.parse(body);
         resolve(userData.response.players[0]);
       } else {
