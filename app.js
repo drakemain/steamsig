@@ -57,12 +57,7 @@ app.get('/display', function(req, res) {
     imgProcess(assets, function() {
       res.sendFile(__dirname + '/assets/img/test/test.png')
     });
-    /*res.render('profileDisplay', {
-      title: userInfo.personaname + "'s Steam Profile",
-      profileVisible : profileVisibility,
-      userInfo: userInfo,
-      elements: elementsObj
-    })*/
+ 
 
     console.log("Sent profile information: " + userInfo.personaname + '\n');
   });

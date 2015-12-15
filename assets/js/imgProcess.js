@@ -19,10 +19,7 @@ module.exports = function (assets, callback) {
         callback();
       }
       else {console.log(err);}
-
   });
-
-
 }
 
 function checkPathExists(path) {
