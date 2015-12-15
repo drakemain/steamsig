@@ -40,7 +40,7 @@ app.get('/form-handler', function(req, res) {
 
 app.get('/display', function(req, res) {
   console.log('Hit on route: /display. ' + req.query.steamid);
-;
+
   getUserData(buildURI(key, req.query.steamid)).then(function(userInfo) {
     var profileVisibility = false;
 
