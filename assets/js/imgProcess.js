@@ -3,14 +3,13 @@ var fs    = require('fs'),
     gm    = require('gm');
 
 module.exports = function (assets, resCallback) {
-  console.log(assets.filePath);
-
   fs.stat(assets.filePath, function(err, stats) {
-    console.log(stats);
     if (!stats) {
       fs.mkdir(assets.filePath);
       console.log('Profile path created');
     } 
+
+    console.log("Rendering profile.");
 
     gm()
     .in('-page', '+0+0')
@@ -23,7 +22,7 @@ module.exports = function (assets, resCallback) {
     .flatten()
     .write(path.join(assets.filePath, assets.fileName), function(err) {
       if (!err) {
-        console.log('Merged images');
+        console.log('Profile rendered.');
         resCallback();
       }
       else {console.log(err);}

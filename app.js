@@ -39,7 +39,7 @@ app.get('/form-handler', function(req, res) {
 });
 
 app.get('/display', function(req, res) {
-  console.log('Hit on route: /display. ' + req.query.steamid);
+  console.log(' /display: ' + req.query.steamid);
 
   getUserData(buildURI(key, req.query.steamid)).then(function(userInfo) {
     var profileVisibility = false;
@@ -71,7 +71,7 @@ var buildURI = function(APIkey, SteamID) {
 }
 
 var getUserData = function(uri) {
-  console.log("Requesting some data");
+  console.log("Sending request to Steam API.");
 
   return new promise(function(resolve, reject) {
     request(uri, function(err, res, body) {
