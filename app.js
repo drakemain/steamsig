@@ -27,8 +27,6 @@ app.get('/', function(req, res) {
 });
 
 app.get('/steamIDForm', function(req, res) {
-  console.log();
-
   res.render('form', {
     title: "Enter Steam ID",
   })
@@ -58,7 +56,7 @@ app.get('/display', function(req, res) {
 
     imgProcess(assets, function() {
       res.sendFile(path.resolve(path.join(assets.filePath, assets.fileName)));
-      console.log("Sending image to client");
+      console.log("Sending image to client. \n");
     });
 
   });
@@ -99,7 +97,7 @@ var steamKeyCheck = function() {
         if (!err) {
           key = data.toString();
 
-          console.log("...Key fetched!");
+          console.log("...Key fetched!\n");
         }
       });
 
@@ -119,7 +117,7 @@ var steamKeyCheck = function() {
           fs.mkdir('./config')
           fs.writeFile(keyFile, data, function(err) {
             if (err) {console.log(err);console.log("TEST");}
-            else {console.log("Key has been saved.");}
+            else {console.log("Key has been saved.\n");}
             key = data;
           })
           rl.close();
