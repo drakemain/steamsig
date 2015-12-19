@@ -58,7 +58,7 @@ app.get('/display', function(req, res) {
 
     imgProcess(assets, function() {
       res.sendFile(path.resolve(path.join(assets.filePath, assets.fileName)));
-      console.log("Sent profile information: " + userInfo.personaname + '\n');
+      console.log("Sending image to client");
     });
 
   });
@@ -89,7 +89,7 @@ var getUserData = function(uri) {
 var steamKeyCheck = function() {
   console.log("Checking for a Steam API Key...");
 
-  var keyFile = 'config/key';
+  var keyFile = 'config/key.txt';
 
   fs.exists(keyFile, function(exists) {
     if (exists) {
@@ -112,22 +112,18 @@ var steamKeyCheck = function() {
       });
 
       console.log("\n...Steam API Key not found!\nIf you don't have a key, get one at https://steamcommunity.com/dev.");
-
-      rl.question("Enter your steam API key: ", function(newKey) {
-        fs.writeFile(keyFile, newKey, function(err) {
-          if (!err) {
-            console.log("Key has been set. Fetching...");
-
-            fs.readFile(keyFile, function(err, data) {
-              key = data.toString();
-
-              console.log("Key fetched!");
-            })
-          }
+      rl.setPrompt("Enter your steam API key: ");
+      rl.prompt()
+      rl.on("line", function(data) {
+          data = data.trim();
+          fs.mkdir('./config')
+          fs.writeFile(keyFile, data, function(err) {
+            if (err) {console.log(err);console.log("TEST");}
+            else {console.log("Key has been saved.");}
+            key = data;
+          })
+          rl.close();
         })
-        
-      rl.close();
-      })
     }
   })
 }
