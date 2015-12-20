@@ -25,7 +25,7 @@ module.exports = function (assets, resCallback) {
     .write(path.join(assets.filePath, assets.fileName), function(err) {
       if (!err) {
         console.log('Profile rendered.');
-        console.log('END IMAGE PROCESSING');
+        console.log('END IMAGE PROCESSING.');
         resCallback();
       }
       else {console.log(err);}
