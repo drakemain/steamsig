@@ -28,8 +28,6 @@ app.get('/', function(req, res) {
 });
 
 app.get('/steamIDForm', function(req, res) {
-  console.log();
-
   res.render('form', {
     title: "Enter Steam ID",
   })
@@ -40,22 +38,16 @@ app.get('/form-handler', function(req, res) {
 });
 
 app.get('/display', function(req, res) {
-  console.log('Hit on route: /display. ' + req.query.steamid);
+  console.log('/display: ' + req.query.steamid);
 
   uInput(key, req.query.steamid)
   .then(function(steamid) {
-    console.log(steamid);
 
     if (steamid) {
 
       getUserData(buildURI(key, steamid))
       .then(function(userInfo) {
-        var profileVisibility = false;
-  
-        if (userInfo.communityvisibilitystate === 3) {
-          profileVisibility = true;
-        }
-  
+
         var assets = {
           fileName: req.query.steamid + '.png',
           filePath: 'assets/img/profile/',
@@ -66,7 +58,7 @@ app.get('/display', function(req, res) {
   
         imgProcess(assets, function() {
           res.sendFile(path.resolve(path.join(assets.filePath, assets.fileName)));
-          console.log("Sending image to client");
+          console.log("Sending image to client.\n");
         });
       });
 
@@ -83,13 +75,15 @@ var buildURI = function(APIkey, SteamID) {
 }
 
 var getUserData = function(uri) {
-  console.log("Requesting some data");
+  console.log("Sending request to Steam API.");
 
   return new promise(function(resolve, reject) {
     request(uri, function(err, res, body) {
       if (!err && res.statusCode === 200) {
         console.log('Response recieved from Steam.')
+
         var userData = JSON.parse(body);
+
         resolve(userData.response.players[0]);
       } else {
         reject(err);
@@ -111,7 +105,7 @@ var steamKeyCheck = function() {
         if (!err) {
           key = data.toString();
 
-          console.log("...Key fetched!");
+          console.log("...Key fetched!\n");
         }
       });
 
@@ -131,11 +125,12 @@ var steamKeyCheck = function() {
           fs.mkdir('./config')
           fs.writeFile(keyFile, data, function(err) {
             if (err) {console.log(err);console.log("TEST");}
-            else {console.log("Key has been saved.");}
+            else {console.log("Key has been saved.\n");}
             key = data;
           })
           rl.close();
         })
+
     }
   })
 }

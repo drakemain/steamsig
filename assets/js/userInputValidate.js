@@ -2,12 +2,15 @@ var request = require('request');
 var promise = require('bluebird');
 
 module.exports = function(key, input) {
-  console.log("VALIDATING USER INPUT.")
+  console.log("START VALIDATING USER INPUT.")
 
   return new promise(function(resolve, reject) {
     validateSteamID(key, input)
     .then(function(steamid) {
+
+      console.log("END VALIDATING USER INPUT.")
       resolve(steamid);
+
     });
   });
   
@@ -26,13 +29,14 @@ function validateSteamID(key, input) {
 
       resolveVanityName(key, trimmedInput)
       .then(function(resObject) {
-        console.log(resObject);
+
         if (resObject.success === 1) {
           console.log("Resolved: " + resObject.steamid);
           resolve(resObject.steamid);
         } else {
           resolve(undefined);
         }
+
       });
 
     } else {
