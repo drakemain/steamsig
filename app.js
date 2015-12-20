@@ -8,6 +8,7 @@ var bparse  = require('body-parser');
 var path    = require('path');
 
 var imgProcess = require('./assets/js/imgProcess.js');
+var uInput     = require("./assets/js/userInputValidate.js");
 
 app = express();
 app.use(bparse.json());
@@ -41,28 +42,39 @@ app.get('/form-handler', function(req, res) {
 app.get('/display', function(req, res) {
   console.log('Hit on route: /display. ' + req.query.steamid);
 
-  getUserData(buildURI(key, req.query.steamid)).then(function(userInfo) {
-    var profileVisibility = false;
+  uInput(key, req.query.steamid)
+  .then(function(steamid) {
+    console.log(steamid);
 
-    if (userInfo.communityvisibilitystate === 3) {
-      profileVisibility = true;
-    }
+    if (steamid) {
 
-    var assets = {
-      fileName: req.query.steamid + '.png',
-      filePath: 'assets/img/profile/',
-      background: 'assets/img/base-gray.png',
-      avatar: userInfo.avatarfull.replace("https", "http"),
-      name: userInfo.personaname
-    }
-
-    imgProcess(assets, function() {
-      res.sendFile(path.resolve(path.join(assets.filePath, assets.fileName)));
-      console.log("Sending image to client");
-    });
-
-  });
+      getUserData(buildURI(key, steamid))
+      .then(function(userInfo) {
+        var profileVisibility = false;
   
+        if (userInfo.communityvisibilitystate === 3) {
+          profileVisibility = true;
+        }
+  
+        var assets = {
+          fileName: req.query.steamid + '.png',
+          filePath: 'assets/img/profile/',
+          background: 'assets/img/base-gray.png',
+          avatar: userInfo.avatarfull.replace("https", "http"),
+          name: userInfo.personaname
+        }
+  
+        imgProcess(assets, function() {
+          res.sendFile(path.resolve(path.join(assets.filePath, assets.fileName)));
+          console.log("Sending image to client");
+        });
+      });
+
+    } else {
+      res.send("Name could not be resolved.");
+    }
+
+  });  
 });
 
 var buildURI = function(APIkey, SteamID) {
