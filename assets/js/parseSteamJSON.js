@@ -1,8 +1,6 @@
-module.exports = {
-  personastate
-}
+var exports = module.exports = {};
 
-function personastate(state) {
+exports.personastate = function(state) {
   switch (state) {
     case 0:
       return "Offline";

@@ -37,4 +37,4 @@ module.exports = function (assets, resCallback) {
       else {console.log(err);}
     });
   })
-}
+};
