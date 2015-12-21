@@ -3,8 +3,8 @@ var promise = require('bluebird');
 
 module.exports = function(key, input) {
   console.log("START VALIDATING USER INPUT.")
-
   return new promise(function(resolve, reject) {
+
     validateSteamID(key, input)
     .then(function(steamid) {
 

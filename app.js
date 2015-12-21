@@ -50,7 +50,7 @@ app.get('/display', function(req, res) {
       .then(function(userInfo) {
 
         var assets = {
-          fileName: req.query.steamid + '.png',
+          fileName: steamid + '.png',
           filePath: 'assets/img/profile/',
           background: 'assets/img/base-gray.png',
           avatar: userInfo.avatarfull.replace("https", "http"),
