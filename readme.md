@@ -2,4 +2,4 @@ Generates a steam profile png image. It will display dynamic information (such a
 
 Graphics Magick binaries are needed for this to work. They can be obtained at http://www.graphicsmagick.org/.
 
-See the current master branch in action here: www.steamsig.drakemain.com.
+See the current master branch in action here: http://steamsig.drakemain.com.
