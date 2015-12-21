@@ -9,6 +9,7 @@ var path    = require('path');
 
 var imgProcess = require('./assets/js/imgProcess.js');
 var uInput     = require("./assets/js/userInputValidate.js");
+var parseSteam = require("./assets/js/parseSteamJSON.js");
 
 app = express();
 app.use(bparse.json());
@@ -53,7 +54,8 @@ app.get('/display', function(req, res) {
           filePath: 'assets/img/profile/',
           background: 'assets/img/base-gray.png',
           avatar: userInfo.avatarfull.replace("https", "http"),
-          name: userInfo.personaname
+          name: userInfo.personaname,
+          personastate: parseSteam.personastate(userInfo.personastate)
         }
   
         imgProcess(assets, function() {

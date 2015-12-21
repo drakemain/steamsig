@@ -16,12 +16,18 @@ module.exports = function (assets, resCallback) {
     gm()
     .in('-page', '+0+0')
     .in(assets.background)
+
     .in('-page', '+8+8')
     .in(assets.avatar)
+
     .font("Arial")
     .fontSize(28)
     .drawText(200, 28, assets.name)
     .flatten()
+
+    .fontSize(16)
+    .drawText(200, 44, assets.personastate)
+
     .write(path.join(assets.filePath, assets.fileName), function(err) {
       if (!err) {
         console.log('Profile rendered.');
