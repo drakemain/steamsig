@@ -70,12 +70,11 @@ var buildURI = function(APIkey, SteamID) {
 }
 
 var getUserData = function(uri) {
-  console.log("Sending request to Steam API. " + uri);
+  console.log("Sending request to Steam API.");
 
   return new promise(function(resolve, reject) {
     request({uri: uri, timeout:6000}, function(err, res, body) {
       if (!err) {
-        console.log(res.statusCode)
         console.log('Response recieved from Steam.')
 
         var userData = JSON.parse(body);
@@ -121,7 +120,7 @@ var steamKeyCheck = function() {
           data = data.trim();
           fs.mkdir('./config')
           fs.writeFile(keyFile, data, function(err) {
-            if (err) {console.log(err);console.log("TEST");}
+            if (err) {console.log(err);}
             else {console.log("Key has been saved.\n");}
             key = data;
           })
