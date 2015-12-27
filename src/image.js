@@ -31,14 +31,15 @@ module.exports = function (userInfo, sendFile) {
 };
 
 function getUserDirectory(steamid) {
-  var userDir = path.join('assets/img/profile/', steamid);
+  var userDir = path.join('assets/profiles', steamid);
 
   return new Promise(function (resolve, reject) {
     fs.stat(userDir, function(err, stats) {
 
       if (!stats) {
-
+        console.log("A new user has requested a profile.");
         fs.mkdir(userDir, function() {
+          console.log(steamid + " now has a directory!\n" + userDir);
           resolve(userDir);
         });
 
