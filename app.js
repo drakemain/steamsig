@@ -7,8 +7,8 @@ var hbars   = require('express-handlebars');
 var bparse  = require('body-parser');
 var path    = require('path');
 
-var imgProcess = require('./assets/js/imgProcess.js');
-var uInput     = require("./assets/js/userInputValidate.js");
+var imgProcess = require('./src/image.js');
+var uInput     = require("./src/validater.js");
 
 app = express();
 app.use(bparse.json());
