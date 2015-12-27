@@ -2,7 +2,7 @@ var fs    = require('fs'),
     path  = require('path'),
     gm    = require('gm'),
     Promise = require('bluebird'),
-    parseSteam = require("../js/parseSteamJSON.js");
+    parseSteam = require("./parser.js");
 
 module.exports = function (userInfo, sendFile) {
   getUserDirectory(userInfo.steamid)

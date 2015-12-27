@@ -8,7 +8,7 @@ var bparse  = require('body-parser');
 var path    = require('path');
 
 var imgProcess = require('./src/image.js');
-var uInput     = require("./src/validater.js");
+var uInput     = require('./src/validate.js');
 
 app = express();
 app.use(bparse.json());
