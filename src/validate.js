@@ -30,10 +30,10 @@ function validateSteamID(key, input) {
       || isNaN(trimmedInput.substr(8,16))) {
 
       resolveVanityName(key, trimmedInput)
-      .then(function(resObject) {
+      .then(function(steamid) {
 
-        console.log("Resolved: " + resObject.steamid);
-        resolve(resObject.steamid);
+        console.log("Resolved: " + steamid);
+        resolve(steamid);
 
       })
 
@@ -61,8 +61,10 @@ function resolveVanityName(key, name) {
         var response = JSON.parse(body).response;
 
         if (response.steamid) {
+          console.log("...resolved.");
           resolve(response.steamid);
         } else {
+          console.log("...could not resolve.")
           reject("Could not resolve vanity name.");
         }
       }
