@@ -11,9 +11,11 @@ module.exports = function(key, input) {
       console.log("END VALIDATING USER INPUT.")
       resolve(steamid);
 
-    });
+    })
+
+    .catch(function(err) {reject(err);});
+
   });
-  
 }
 
 function validateSteamID(key, input) {
@@ -30,14 +32,12 @@ function validateSteamID(key, input) {
       resolveVanityName(key, trimmedInput)
       .then(function(resObject) {
 
-        if (resObject.success === 1) {
-          console.log("Resolved: " + resObject.steamid);
-          resolve(resObject.steamid);
-        } else {
-          resolve(undefined);
-        }
+        console.log("Resolved: " + resObject.steamid);
+        resolve(resObject.steamid);
 
-      });
+      })
+
+      .catch(function(err) {reject(err);});
 
     } else {
       console.log("Input was a valid Steam ID.")
@@ -56,11 +56,25 @@ function resolveVanityName(key, name) {
   return new promise(function(resolve, reject) {
     console.log("Testing for vanity name...");
 
-    request(apiRequest, function(err, res, body) {
-      if (!err && res.statusCode === 200) {
-        console.log("...Success.")
+    request({uri:apiRequest, timeout:3000}, function(err, res, body) {
+      if (!err) {
+        var response = JSON.parse(body).response;
 
-        resolve(JSON.parse(body).response);
+        if (response.steamid) {
+          resolve(response.steamid);
+        } else {
+          reject("Could not resolve vanity name.");
+        }
+      }
+    })
+
+    .on('error', function(err) {
+
+      if (err.code === "ETIMEDOUT") {
+        console.log("...Steam timed out.");
+        reject("Steam failed to return response while resolving vanity name.");
+      } else {
+        reject(err);
       }
     });
   });

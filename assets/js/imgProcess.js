@@ -1,40 +1,48 @@
 var fs    = require('fs'),
     path  = require('path'),
-    gm    = require('gm');
+    gm    = require('gm'),
+    Promise = require('bluebird'),
+    parseSteam = require("../js/parseSteamJSON.js");
 
-module.exports = function (assets, resCallback) {
-  console.log('START IMAGE PROCESSING.')
-
-  fs.stat(assets.filePath, function(err, stats) {
-    if (!stats) {
-      fs.mkdir(assets.filePath);
-      console.log('Profile path created');
-    } 
-
-    console.log('Rendering profile.')
-
+module.exports = function (userInfo, sendFile) {
+  getUserDirectory(userInfo.steamid)
+  .then(function(userDir) {
+    console.log('Processing image...');
     gm()
     .in('-page', '+0+0')
-    .in(assets.background)
+    .in('assets/img/base-gray.png')
 
     .in('-page', '+8+8')
-    .in(assets.avatar)
+    .in(userInfo.avatarfull.replace("https", "http"))
 
     .font("Arial")
     .fontSize(28)
-    .drawText(200, 28, assets.name)
+    .drawText(200, 28, userInfo.personaname)
     .flatten()
 
     .fontSize(16)
-    .drawText(200, 44, assets.personastate)
+    .drawText(200, 44, parseSteam.personastate(userInfo.personastate))
 
-    .write(path.join(assets.filePath, assets.fileName), function(err) {
-      if (!err) {
-        console.log('Profile rendered.');
-        console.log('END IMAGE PROCESSING.');
-        resCallback();
-      }
+    .write(path.join(userDir, 'profile.png'), function(err) {
+      if (!err) {sendFile(path.join(userDir, 'profile.png'));}
       else {console.log(err);}
     });
-  })
+  });
 };
+
+function getUserDirectory(steamid) {
+  var userDir = path.join('assets/img/profile/', steamid);
+
+  return new Promise(function (resolve, reject) {
+    fs.stat(userDir, function(err, stats) {
+
+      if (!stats) {
+
+        fs.mkdir(userDir, function() {
+          resolve(userDir);
+        });
+
+      } else {resolve(userDir);}   
+    });
+  });
+}

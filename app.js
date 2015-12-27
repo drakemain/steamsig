@@ -9,7 +9,6 @@ var path    = require('path');
 
 var imgProcess = require('./assets/js/imgProcess.js');
 var uInput     = require("./assets/js/userInputValidate.js");
-var parseSteam = require("./assets/js/parseSteamJSON.js");
 
 app = express();
 app.use(bparse.json());
@@ -39,36 +38,30 @@ app.get('/form-handler', function(req, res) {
 });
 
 app.get('/display', function(req, res) {
-  console.log('/display: ' + req.query.steamid);
+  console.log(new Date() + '\n/display: ' + req.query.steamid);
 
   uInput(key, req.query.steamid)
+
   .then(function(steamid) {
+    var URI = buildURI(key, steamid);
+    return getUserData(URI);
+    //return steamStub();
+  })
 
-    if (steamid) {
+  .then(function(userInfo) {
+    imgProcess(userInfo, function(file) {
+      res.sendFile(path.resolve(file));
+      console.log("Sending image to client.\n");
+    })
+  })
 
-      getUserData(buildURI(key, steamid))
-      .then(function(userInfo) {
-
-        var assets = {
-          fileName: steamid + '.png',
-          filePath: 'assets/img/profile/',
-          background: 'assets/img/base-gray.png',
-          avatar: userInfo.avatarfull.replace("https", "http"),
-          name: userInfo.personaname,
-          personastate: parseSteam.personastate(userInfo.personastate)
-        }
-  
-        imgProcess(assets, function() {
-          res.sendFile(path.resolve(path.join(assets.filePath, assets.fileName)));
-          console.log("Sending image to client.\n");
-        });
-      });
-
+  .catch(function(err) {
+    if (err.code === "ETIMEDOUT") {
+      res.send("Timed out while trying to communicate with Steam.");
     } else {
-      res.send("Name could not be resolved.");
+      res.send(err);
     }
-
-  });  
+  });
 });
 
 var buildURI = function(APIkey, SteamID) {
@@ -77,19 +70,21 @@ var buildURI = function(APIkey, SteamID) {
 }
 
 var getUserData = function(uri) {
-  console.log("Sending request to Steam API.");
+  console.log("Sending request to Steam API. " + uri);
 
   return new promise(function(resolve, reject) {
-    request(uri, function(err, res, body) {
-      if (!err && res.statusCode === 200) {
+    request({uri: uri, timeout:6000}, function(err, res, body) {
+      if (!err) {
+        console.log(res.statusCode)
         console.log('Response recieved from Steam.')
 
         var userData = JSON.parse(body);
 
         resolve(userData.response.players[0]);
-      } else {
-        reject(err);
       }
+    })
+    .on('error', function(err) {
+      reject(err);
     });
   });
 }
