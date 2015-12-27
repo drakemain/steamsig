@@ -132,6 +132,19 @@ var steamKeyCheck = function() {
   })
 }
 
-steamKeyCheck();
-app.listen(3000);
-console.log("App started listening on port 3000.");
+var init = function() {
+
+  fs.stat('assets/profiles', function(err, stats) {
+    if (!stats) {
+      fs.mkdir('assets/profiles', function() {
+        console.log("Created profiles directory.");
+      });
+    }
+  });
+
+  steamKeyCheck();
+  app.listen(3000);
+  console.log("App started listening on port 3000.");
+}
+
+init();
