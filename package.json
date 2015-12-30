@@ -9,5 +9,6 @@
     "express-handlebars": "^2.0.1",
     "gm": "^1.21.1",
     "request": "^2.65.0"
-  }
+  },
+  "license": "BSD-3-Clause"
 }
