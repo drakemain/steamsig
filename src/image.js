@@ -18,10 +18,13 @@ module.exports = function (userInfo, sendFile) {
     .font("Arial")
     .fontSize(28)
     .drawText(200, 28, userInfo.personaname)
-    .flatten()
 
     .fontSize(16)
-    .drawText(200, 44, parseSteam.personastate(userInfo.personastate))
+    .drawText(200, 45, parseSteam.personastate(userInfo.personastate))
+
+    .drawText(200, 62, parseSteam.timecreated(userInfo.timecreated))
+
+    .flatten()
 
     .write(path.join(userDir, 'profile.png'), function(err) {
       if (!err) {sendFile(path.join(userDir, 'profile.png'));}
