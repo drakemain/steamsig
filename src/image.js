@@ -8,7 +8,7 @@ module.exports = function (userInfo, sendFile) {
   getUserDirectory(userInfo.steamid)
   .then(function(userDir) {
     console.log('Processing image...');
-    gm()
+    var img = gm()
     .in('-page', '+0+0')
     .in('assets/img/base-gray.png')
 
@@ -19,11 +19,21 @@ module.exports = function (userInfo, sendFile) {
     .fontSize(28)
     .drawText(200, 28, userInfo.personaname)
 
-    .fontSize(16)
-    .drawText(200, 45, parseSteam.personastate(userInfo.personastate))
+    if (userInfo.communityvisibilitystate !== 3) {
+      img
+      .in('-page', '+0+0')
+      .in('assets/img/confidential.png')
 
-    .drawText(200, 62, parseSteam.timecreated(userInfo.timecreated))
+    } else {
+      img
+      .fontSize(16)
+      .drawText(200, 45, parseSteam.personastate(userInfo.personastate))
 
+      .drawText(200, 62, parseSteam.timecreated(userInfo.timecreated))
+
+    }
+    
+    img
     .flatten()
 
     .write(path.join(userDir, 'profile.png'), function(err) {
