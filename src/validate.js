@@ -1,19 +1,33 @@
 var request = require('request');
 var promise = require('bluebird');
+var fs      = require('fs');
 
-module.exports = function(key, input) {
-  console.log("START VALIDATING USER INPUT.")
+var exports = module.exports = {};
+
+exports.steamid = function(key, input) {
   return new promise(function(resolve, reject) {
 
     validateSteamID(key, input)
     .then(function(steamid) {
-
-      console.log("END VALIDATING USER INPUT.")
       resolve(steamid);
 
     })
 
     .catch(function(err) {reject(err);});
+
+  });
+}
+
+exports.profileExists = function(profileID) {
+  var profileDir = path.join('assets/profiles', profileID);
+
+  fs.stat(profileDir, function(err, stats) {
+    
+    if (stats) {
+      return(true);
+    } else {
+      return(false);
+    }
 
   });
 }
@@ -31,40 +45,32 @@ function validateSteamID(key, input) {
 
       resolveVanityName(key, trimmedInput)
       .then(function(steamid) {
-
-        console.log("Resolved: " + steamid);
         resolve(steamid);
-
       })
 
       .catch(function(err) {reject(err);});
 
     } else {
-      console.log("Input was a valid Steam ID.")
       resolve(trimmedInput);
     }  
   });
 }
 
 function resolveVanityName(key, name) {
-  console.log("Input was not a valid Steam ID.");
 
   var apiRequest = "http://api.steampowered.com/ISteamUser"
     + "/ResolveVanityURL/v0001/?key=" + key + "&vanityurl="
     + name;
 
   return new promise(function(resolve, reject) {
-    console.log("Testing for vanity name...");
 
     request({uri:apiRequest, timeout:3000}, function(err, res, body) {
       if (!err) {
         var response = JSON.parse(body).response;
 
         if (response.steamid) {
-          console.log("...resolved.");
           resolve(response.steamid);
         } else {
-          console.log("...could not resolve.")
           reject("Could not resolve vanity name.");
         }
       }
@@ -73,7 +79,7 @@ function resolveVanityName(key, name) {
     .on('error', function(err) {
 
       if (err.code === "ETIMEDOUT") {
-        console.log("...Steam timed out.");
+        console.log("Failed to communicate with Steam.");
         reject("Steam failed to return response while resolving vanity name.");
       } else {
         reject(err);
@@ -82,3 +88,6 @@ function resolveVanityName(key, name) {
   });
 }
 
+function checkProfileExists(profileID) {
+
+}

@@ -1,14 +1,12 @@
 var promise = require('bluebird');
 var path    = require('path');
 var fs      = require('fs');
-var request = require('request');
 var express = require('express');
 var hbars   = require('express-handlebars');
 var bparse  = require('body-parser');
 var path    = require('path');
 
-var imgProcess = require('./src/image.js');
-var uInput     = require('./src/validate.js');
+var form    = require('./src/form-handler.js');
 
 app = express();
 app.use(bparse.json());
@@ -34,25 +32,18 @@ app.get('/steamIDForm', function(req, res) {
 });
 
 app.get('/form-handler', function(req, res) {
-  console.log(req.query.SteamID);
+  res.redirect('/profile/' + req.query.steamid);
 });
 
-app.get('/display', function(req, res) {
-  console.log(new Date() + '\n/display: ' + req.query.steamid);
+app.get('/profile/:user', function(req, res) {
+  console.log(new Date() + '\n/profile/' + req.params.user);
 
-  uInput(key, req.query.steamid)
+  form.renderProfile(key, req.params.user)
 
-  .then(function(steamid) {
-    var URI = buildURI(key, steamid);
-    return getUserData(URI);
-    //return steamStub();
-  })
+  .then(function(profileImg) {
+    res.sendFile(path.resolve(profileImg));
 
-  .then(function(userInfo) {
-    imgProcess(userInfo, function(file) {
-      res.sendFile(path.resolve(file));
-      console.log("Sending image to client.\n");
-    })
+    console.log('Transaction complete.\n');
   })
 
   .catch(function(err) {
@@ -63,30 +54,6 @@ app.get('/display', function(req, res) {
     }
   });
 });
-
-var buildURI = function(APIkey, SteamID) {
-  return "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key="
-    + APIkey + "&steamids=" + SteamID;
-}
-
-var getUserData = function(uri) {
-  console.log("Sending request to Steam API.");
-
-  return new promise(function(resolve, reject) {
-    request({uri: uri, timeout:6000}, function(err, res, body) {
-      if (!err) {
-        console.log('Response recieved from Steam.')
-
-        var userData = JSON.parse(body);
-
-        resolve(userData.response.players[0]);
-      }
-    })
-    .on('error', function(err) {
-      reject(err);
-    });
-  });
-}
 
 var steamKeyCheck = function() {
   console.log("Checking for a Steam API Key...");
