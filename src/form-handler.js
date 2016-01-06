@@ -2,15 +2,15 @@ var promise = require('bluebird');
 var express = require('express');
 var request = require('request');
 
-var validate = require('./validate.js');
-var imgProcess = require('./image.js');
+var validate = require('./validate');
+var imgProcess = require('./image');
 
 var exports = module.exports = {};
 
-exports.renderProfile = function(key, steamid) {
+exports.renderProfile = function(key, uInput) {
   return new promise(function(resolve, reject) {
   
-    validate.steamid(key, steamid)
+    validate.steamid(key, uInput)
   
     .then(function(steamid) {
       var URI = buildURI(key, steamid);
@@ -32,7 +32,6 @@ var getUserData = function(uri) {
   return new promise(function(resolve, reject) {
     request({uri: uri, timeout:6000}, function(err, res, body) {
       if (!err) {
-        console.log('Recieved user data from Steam.')
         var userData = JSON.parse(body);
 
         resolve(userData.response.players[0]);

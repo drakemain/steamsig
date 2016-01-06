@@ -1,11 +1,11 @@
 var request = require('request');
-var promise = require('bluebird');
+var Promise = require('bluebird');
 var fs      = require('fs');
 
 var exports = module.exports = {};
 
 exports.steamid = function(key, input) {
-  return new promise(function(resolve, reject) {
+  return new Promise(function(resolve, reject) {
 
     validateSteamID(key, input)
     .then(function(steamid) {
@@ -19,15 +19,11 @@ exports.steamid = function(key, input) {
 }
 
 exports.profileExists = function(profileID) {
-  var profileDir = path.join('assets/profiles', profileID);
+  var profileDir = path.join('assets', 'profiles', profileID);
 
   fs.stat(profileDir, function(err, stats) {
     
-    if (stats) {
-      return(true);
-    } else {
-      return(false);
-    }
+    return !!stats
 
   });
 }
@@ -38,7 +34,7 @@ function validateSteamID(key, input) {
     .replace(/\//g, '')
     .trim();
 
-  return new promise(function(resolve, reject) {
+  return new Promise(function(resolve, reject) {
     if (trimmedInput.substr(0,7) !== "7656119"
       || trimmedInput.length !== 17
       || isNaN(trimmedInput.substr(8,16))) {
@@ -62,7 +58,7 @@ function resolveVanityName(key, name) {
     + "/ResolveVanityURL/v0001/?key=" + key + "&vanityurl="
     + name;
 
-  return new promise(function(resolve, reject) {
+  return new Promise(function(resolve, reject) {
 
     request({uri:apiRequest, timeout:3000}, function(err, res, body) {
       if (!err) {

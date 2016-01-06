@@ -1,11 +1,11 @@
 var fs    = require('fs'),
     path  = require('path'),
     gm    = require('gm'),
-    promise = require('bluebird'),
-    parseSteam = require("./parser.js");
+    Promise = require('bluebird'),
+    parseSteam = require("./parser");
 
 module.exports = function (userInfo) {
-  return new promise(function(resolve, reject) {
+  return new Promise(function(resolve, reject) {
 
     getUserDirectory(userInfo.steamid)
     .then(function(userDir) {
@@ -49,9 +49,9 @@ module.exports = function (userInfo) {
 };
 
 function getUserDirectory(steamid) {
-  var userDir = path.join('assets/profiles', steamid);
+  var userDir = path.join('assets', 'profiles', steamid);
 
-  return new promise(function (resolve, reject) {
+  return new Promise(function (resolve, reject) {
     fs.stat(userDir, function(err, stats) {
 
       if (!stats) {

@@ -1,4 +1,3 @@
-var promise = require('bluebird');
 var path    = require('path');
 var fs      = require('fs');
 var express = require('express');
@@ -6,7 +5,7 @@ var hbars   = require('express-handlebars');
 var bparse  = require('body-parser');
 var path    = require('path');
 
-var form    = require('./src/form-handler.js');
+var form    = require('./src/form-handler');
 
 app = express();
 app.use(bparse.json());
@@ -31,19 +30,18 @@ app.get('/steamIDForm', function(req, res) {
   })
 });
 
+//will be more uselfull later...
 app.get('/form-handler', function(req, res) {
   res.redirect('/profile/' + req.query.steamid);
 });
 
 app.get('/profile/:user', function(req, res) {
-  console.log(new Date() + '\n/profile/' + req.params.user);
+  console.log(new Date() + ': /profile/' + req.params.user);
 
   form.renderProfile(key, req.params.user)
 
   .then(function(profileImg) {
     res.sendFile(path.resolve(profileImg));
-
-    console.log('Transaction complete.\n');
   })
 
   .catch(function(err) {
@@ -58,7 +56,7 @@ app.get('/profile/:user', function(req, res) {
 var steamKeyCheck = function() {
   console.log("Checking for a Steam API Key...");
 
-  var keyFile = 'config/key.txt';
+  var keyFile = path.join('config', 'key.txt');
 
   fs.exists(keyFile, function(exists) {
     if (exists) {
