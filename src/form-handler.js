@@ -8,24 +8,20 @@ var imgProcess = require('./image');
 var exports = module.exports = {};
 
 exports.renderProfile = function(key, uInput) {
-  return new promise(function(resolve, reject) {
-  
-    validate.steamid(key, uInput)
-  
-    .then(function(steamid) {
-      var URI = buildURI(key, steamid);
-      return getUserData(URI);
-    })
-  
-    .then(function(userInfo) {
-      resolve(imgProcess(userInfo));
-    })
-  
-    .catch(function(err) {
-      reject(err);
-    });
+  return validate.steamid(key, uInput)
+
+  .then(function(steamid) {
+    var URI = buildURI(key, steamid);
+    return getUserData(URI);
+  })
+
+  .then(imgProcess)
+
+  .catch(function(err) {
+    console.log(err, '\n');
+    return Promise.reject(err);
   });
-};
+}
 
 var getUserData = function(uri) {
 
