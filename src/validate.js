@@ -5,17 +5,15 @@ var fs      = require('fs');
 var exports = module.exports = {};
 
 exports.steamid = function(key, input) {
-  return new Promise(function(resolve, reject) {
+    return validateSteamID(key, input)
 
-    validateSteamID(key, input)
     .then(function(steamid) {
-      resolve(steamid);
-
+      return steamid;
     })
 
-    .catch(function(err) {reject(err);});
-
-  });
+    .catch(function(err) {
+      return Promise.reject(err);
+    });
 }
 
 exports.profileExists = function(profileID) {
@@ -34,22 +32,17 @@ function validateSteamID(key, input) {
     .replace(/\//g, '')
     .trim();
 
-  return new Promise(function(resolve, reject) {
-    if (trimmedInput.substr(0,7) !== "7656119"
-      || trimmedInput.length !== 17
-      || isNaN(trimmedInput.substr(8,16))) {
+  if (trimmedInput.substr(0,7) !== "7656119"
+    || trimmedInput.length !== 17
+    || isNaN(trimmedInput.substr(8,16))) {
 
-      resolveVanityName(key, trimmedInput)
-      .then(function(steamid) {
-        resolve(steamid);
-      })
+    return resolveVanityName(key, trimmedInput)
 
-      .catch(function(err) {reject(err);});
+    .then(function(steamid) {return Promise.resolve(steamid);})
 
-    } else {
-      resolve(trimmedInput);
-    }  
-  });
+    .catch(function(err) {return Promise.reject(err);});
+
+  } else {return Promise.resolve(trimmedInput);}  
 }
 
 function resolveVanityName(key, name) {
