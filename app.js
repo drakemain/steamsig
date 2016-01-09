@@ -49,7 +49,7 @@ app.get('/profile/:user', function(req, res) {
       console.log(err.SSigLog);
       res.send(err.SSigMsg);
     } else {
-      console.log(err);
+      console.log(err, "!Unhandled error!");
       res.send("An error occurred!");
     }
   });
