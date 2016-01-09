@@ -5,15 +5,7 @@ var fs      = require('fs');
 var exports = module.exports = {};
 
 exports.steamid = function(key, input) {
-    return validateSteamID(key, input)
-
-    .then(function(steamid) {
-      return steamid;
-    })
-
-    .catch(function(err) {
-      return Promise.reject(err);
-    });
+  return validateSteamID(key, input)
 }
 
 exports.profileExists = function(profileID) {
@@ -38,11 +30,13 @@ function validateSteamID(key, input) {
 
     return resolveVanityName(key, trimmedInput)
 
-    .then(function(steamid) {return Promise.resolve(steamid);})
+    .then(function(steamid) {return steamid})
 
-    .catch(function(err) {return Promise.reject(err);});
+    .catch(function(err) {return err});
 
-  } else {return Promise.resolve(trimmedInput);}  
+  } else {
+    return Promise.resolve(trimmedInput);
+  }  
 }
 
 function resolveVanityName(key, name) {

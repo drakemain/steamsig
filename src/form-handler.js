@@ -18,7 +18,6 @@ exports.renderProfile = function(key, uInput) {
   .then(imgProcess)
 
   .catch(function(err) {
-    console.log(err, '\n');
     return Promise.reject(err);
   });
 }
