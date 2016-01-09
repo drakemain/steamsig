@@ -48,6 +48,9 @@ app.get('/profile/:user', function(req, res) {
     if (err.SSigErr) {
       console.log(err.SSigLog);
       res.send(err.SSigMsg);
+    } else {
+      console.log(err);
+      res.send("An error occurred!");
     }
   });
 });
