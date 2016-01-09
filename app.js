@@ -45,12 +45,9 @@ app.get('/profile/:user', function(req, res) {
   })
 
   .catch(function(err) {
-    console.log(err, '\n');
-
-    if (err.code === "ETIMEDOUT") {
-      res.send("Timed out while trying to communicate with Steam.");
-    } else {
-      res.send(err);
+    if (err.SSigErr) {
+      console.log(err.SSigLog);
+      res.send(err.SSigMsg);
     }
   });
 });

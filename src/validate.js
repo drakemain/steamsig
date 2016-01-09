@@ -50,7 +50,9 @@ function resolveVanityName(key, name) {
         if (response.steamid) {
           resolve(response.steamid);
         } else {
-          reject("Could not resolve vanity name.");
+          reject({SSigErr: "Steam-Vanity-Unresolved",
+            SSigMsg: "The name you submitted could not be resolved!",
+            SSigLog: "Failed to resolve vanity name."});
         }
       }
     })
@@ -58,8 +60,9 @@ function resolveVanityName(key, name) {
     .on('error', function(err) {
 
       if (err.code === "ETIMEDOUT") {
-        console.log("Failed to communicate with Steam.");
-        reject("Steam failed to return response while resolving vanity name.");
+        reject({SSigErr: "Steam-Vanity-Timeout", 
+          SSigMsg: "Timed out while communicating with Steam.",
+          SSigLog: "Failed to communicate with Steam while resolving vanity name."});
       } else {
         reject(err);
       }
