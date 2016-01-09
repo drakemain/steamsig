@@ -32,8 +32,6 @@ function validateSteamID(key, input) {
 
     .then(function(steamid) {return steamid})
 
-    .catch(function(err) {return err});
-
   } else {
     return Promise.resolve(trimmedInput);
   }  
