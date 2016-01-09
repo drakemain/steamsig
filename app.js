@@ -46,10 +46,10 @@ app.get('/profile/:user', function(req, res) {
 
   .catch(function(err) {
     if (err.SSigErr) {
-      console.log(err.SSigLog);
+      console.error(err.SSigLog);
       res.send(err.SSigMsg);
     } else {
-      console.log(err, "!Unhandled error!");
+      console.error(err, "!Unhandled error!");
       res.status(500).send("ARG! You started the self-destruct sequence!");
     }
   });
