@@ -16,10 +16,6 @@ exports.renderProfile = function(key, uInput) {
   })
 
   .then(imgProcess)
-
-  .catch(function(err) {
-    return Promise.reject(err);
-  });
 }
 
 var getUserData = function(uri) {

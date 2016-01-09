@@ -30,8 +30,6 @@ function validateSteamID(key, input) {
 
     return resolveVanityName(key, trimmedInput)
 
-    .then(function(steamid) {return steamid})
-
   } else {
     return Promise.resolve(trimmedInput);
   }  
