@@ -50,7 +50,7 @@ app.get('/profile/:user', function(req, res) {
       res.send(err.SSigMsg);
     } else {
       console.log(err, "!Unhandled error!");
-      res.send("An error occurred!");
+      res.status(500).send("ARG! You started the self-destruct sequence!");
     }
   });
 });
