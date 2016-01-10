@@ -2,6 +2,8 @@ var request = require('request');
 var Promise = require('bluebird');
 var fs      = require('fs');
 
+var SteamIDValidationError = require('./error');
+
 var exports = module.exports = {};
 
 exports.steamid = function(key, input) {
@@ -23,7 +25,7 @@ function validateSteamID(key, input) {
     .replace(/\\/g, '')
     .replace(/\//g, '')
     .trim();
-
+ 
   if (trimmedInput.substr(0,7) !== "7656119"
     || trimmedInput.length !== 17
     || isNaN(trimmedInput.substr(8,16))) {
@@ -32,7 +34,7 @@ function validateSteamID(key, input) {
 
   } else {
     return Promise.resolve(trimmedInput);
-  }  
+  }
 }
 
 function resolveVanityName(key, name) {
@@ -43,16 +45,16 @@ function resolveVanityName(key, name) {
 
   return new Promise(function(resolve, reject) {
 
-    request({uri:apiRequest, timeout:3000}, function(err, res, body) {
+    request({uri:apiRequest, timeout:6000}, function(err, res, body) {
       if (!err) {
         var response = JSON.parse(body).response;
 
         if (response.steamid) {
           resolve(response.steamid);
         } else {
-          reject({SSigErr: "Steam-Vanity-Unresolved",
-            SSigMsg: "The name you submitted could not be resolved!",
-            SSigLog: "Failed to resolve vanity name."});
+          reject(new SteamIDValidationError("bad-vanity-name",
+            "The name you entered doesn't seem to be associated with a Steam account.",
+            "Could not resolve vanity name."));
         }
       }
     })
@@ -60,9 +62,9 @@ function resolveVanityName(key, name) {
     .on('error', function(err) {
 
       if (err.code === "ETIMEDOUT") {
-        reject({SSigErr: "Steam-Vanity-Timeout", 
-          SSigMsg: "Timed out while communicating with Steam.",
-          SSigLog: "Failed to communicate with Steam while resolving vanity name."});
+        reject(new SteamIDValidationError("vanity-name-timeout",
+          "Steam isn't responding!",
+          "Timed out while resolving vanity name."));
       } else {
         reject(err);
       }

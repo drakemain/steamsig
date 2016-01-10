@@ -3,6 +3,7 @@ var express = require('express');
 var request = require('request');
 
 var validate = require('./validate');
+var SteamIDValidationError = require('./error');
 var imgProcess = require('./image');
 
 var exports = module.exports = {};
@@ -29,7 +30,13 @@ var getUserData = function(uri) {
       }
     })
     .on('error', function(err) {
-      reject(err);
+      if (err.code === "ETIMEDOUT") {
+        reject(new SteamIDValidationError("steam-profile-timeout",
+          "Steam isn't responding!",
+          "Timed out while getting user profile."));
+      } else {
+        reject(err);
+      }
     });
   });
 }
