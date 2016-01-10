@@ -2,7 +2,7 @@ var request = require('request');
 var Promise = require('bluebird');
 var fs      = require('fs');
 
-var SteamIDValidationError = require('./error');
+var SteamSigError = require('./error')
 
 var exports = module.exports = {};
 
@@ -52,8 +52,7 @@ function resolveVanityName(key, name) {
         if (response.steamid) {
           resolve(response.steamid);
         } else {
-          reject(new SteamIDValidationError("The name you entered doesn't seem to be associated with a Steam account.",
-            "Could not resolve vanity name."));
+          reject(new SteamSigError.SteamIDValidationError());
         }
       }
     })
@@ -61,8 +60,7 @@ function resolveVanityName(key, name) {
     .on('error', function(err) {
 
       if (err.code === "ETIMEDOUT") {
-        reject(new SteamIDValidationError("Steam isn't responding!",
-          "Timed out while resolving vanity name."));
+        reject(new SteamSigError.SteamTimeoutError());
       } else {
         reject(err);
       }

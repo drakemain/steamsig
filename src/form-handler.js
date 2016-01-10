@@ -3,7 +3,7 @@ var express = require('express');
 var request = require('request');
 
 var validate = require('./validate');
-var SteamIDValidationError = require('./error');
+var SteamSigError = require('./error');
 var imgProcess = require('./image');
 
 var exports = module.exports = {};
@@ -11,12 +11,25 @@ var exports = module.exports = {};
 exports.renderProfile = function(key, uInput) {
   return validate.steamid(key, uInput)
 
+  .tap(function() {
+    console.time("API");
+  })
+
   .then(function(steamid) {
     var URI = buildURI(key, steamid);
     return getUserData(URI);
   })
 
+  .tap(function() {
+    console.timeEnd("API");
+    console.time("imgProcess");
+  })
+
   .then(imgProcess)
+
+  .tap(function() {
+    console.timeEnd("imgProcess");
+  })
 }
 
 var getUserData = function(uri) {
@@ -31,8 +44,7 @@ var getUserData = function(uri) {
     })
     .on('error', function(err) {
       if (err.code === "ETIMEDOUT") {
-        reject(new SteamIDValidationError("Steam isn't responding!",
-          "Timed out while getting user profile."));
+        reject(new SteamSigError.SteamTimeoutError());
       } else {
         reject(err);
       }

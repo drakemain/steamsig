@@ -6,7 +6,7 @@ var bparse  = require('body-parser');
 var path    = require('path');
 
 var form    = require('./src/form-handler');
-var SteamIDValidationError = require('./src/error')
+var SteamSigErrors = require('./src/error')
 
 app = express();
 app.use(bparse.json());
@@ -45,9 +45,16 @@ app.get('/profile/:user', function(req, res) {
     res.sendFile(path.resolve(profileImg));
   })
 
-  .catch(SteamIDValidationError, function(err) {
-    console.error(err.log);
-    res.send(err.message);
+  .catch(SteamSigErrors.SteamIDValidationError, function(err) {
+    console.log("Validation.");
+    console.error(err.message);
+    res.send("The name or ID could not be associated to a Steam account.");
+  })
+
+  .catch(SteamSigErrors.SteamTimeoutError, function(err) {
+    console.log("Timeout.");
+    console.log(err.message);
+    res.send("Steam is not responding to requests!");
   })
   .catch(function(err) {
     console.log("An unhandled error occured.");
