@@ -31,8 +31,7 @@ var getUserData = function(uri) {
     })
     .on('error', function(err) {
       if (err.code === "ETIMEDOUT") {
-        reject(new SteamIDValidationError("steam-profile-timeout",
-          "Steam isn't responding!",
+        reject(new SteamIDValidationError("Steam isn't responding!",
           "Timed out while getting user profile."));
       } else {
         reject(err);

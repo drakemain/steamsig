@@ -52,8 +52,7 @@ function resolveVanityName(key, name) {
         if (response.steamid) {
           resolve(response.steamid);
         } else {
-          reject(new SteamIDValidationError("bad-vanity-name",
-            "The name you entered doesn't seem to be associated with a Steam account.",
+          reject(new SteamIDValidationError("The name you entered doesn't seem to be associated with a Steam account.",
             "Could not resolve vanity name."));
         }
       }
@@ -62,8 +61,7 @@ function resolveVanityName(key, name) {
     .on('error', function(err) {
 
       if (err.code === "ETIMEDOUT") {
-        reject(new SteamIDValidationError("vanity-name-timeout",
-          "Steam isn't responding!",
+        reject(new SteamIDValidationError("Steam isn't responding!",
           "Timed out while resolving vanity name."));
       } else {
         reject(err);
