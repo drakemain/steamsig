@@ -45,16 +45,13 @@ app.get('/profile/:user', function(req, res) {
     res.sendFile(path.resolve(profileImg));
   })
 
-  .catch(SteamSigErrors.SteamIDValidationError, function(err) {
-    console.log("Validation.");
+  .catch(SteamSigErrors.Validation, function(err) {
     console.error(err.message);
-    res.send("The name or ID could not be associated to a Steam account.");
+    res.status(400).send("The name or ID could not be associated to a Steam account.");
   })
-
-  .catch(SteamSigErrors.SteamTimeoutError, function(err) {
-    console.log("Timeout.");
+  .catch(SteamSigErrors.TimeOut, function(err) {
     console.log(err.message);
-    res.send("Steam is not responding to requests!");
+    res.status(504).send("Steam is not responding to requests!");
   })
   .catch(function(err) {
     console.log("An unhandled error occured.");

@@ -44,7 +44,7 @@ var getUserData = function(uri) {
     })
     .on('error', function(err) {
       if (err.code === "ETIMEDOUT") {
-        reject(new SteamSigError.SteamTimeoutError());
+        reject(new SteamSigError.TimeOut());
       } else {
         reject(err);
       }

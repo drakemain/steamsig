@@ -52,7 +52,7 @@ function resolveVanityName(key, name) {
         if (response.steamid) {
           resolve(response.steamid);
         } else {
-          reject(new SteamSigError.SteamIDValidationError());
+          reject(new SteamSigError.Validation());
         }
       }
     })
@@ -60,7 +60,7 @@ function resolveVanityName(key, name) {
     .on('error', function(err) {
 
       if (err.code === "ETIMEDOUT") {
-        reject(new SteamSigError.SteamTimeoutError());
+        reject(new SteamSigError.TimeOut());
       } else {
         reject(err);
       }

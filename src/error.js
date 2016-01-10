@@ -1,20 +1,20 @@
 var util = require('util');
 var exports = module.exports;
 
-function SteamIDValidationError() {
+function Validation() {
   Error.captureStackTrace(this, this.constructor);
   this.message = "Could not validate vanity name.";
 }
 
-util.inherits(SteamIDValidationError, Error);
+util.inherits(Validation, Error);
 
-exports.SteamIDValidationError = SteamIDValidationError;
+exports.Validation = Validation;
 
-function SteamTimeoutError() {
+function TimeOut() {
   Error.captureStackTrace(this, this.constructor);
   this.message = "Timed out while waiting for a Steam response."
 }
 
-util.inherits(SteamTimeoutError, Error);
+util.inherits(TimeOut, Error);
 
-exports.SteamTimeoutError = SteamTimeoutError;
+exports.TimeOut = TimeOut;
