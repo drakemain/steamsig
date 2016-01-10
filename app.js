@@ -6,7 +6,6 @@ var bparse  = require('body-parser');
 var path    = require('path');
 
 var form    = require('./src/form-handler');
-var SteamIDValidationError = require('./src/error')
 
 app = express();
 app.use(bparse.json());
@@ -45,14 +44,14 @@ app.get('/profile/:user', function(req, res) {
     res.sendFile(path.resolve(profileImg));
   })
 
-  .catch(SteamIDValidationError, function(err) {
-    console.error(err.log);
-    res.send(err.message);
-  })
   .catch(function(err) {
-    console.log("An unhandled error occured.");
-    console.error(err);
-    res.status(500).send("ARG! You've destroyed everything!")
+    if (err.SSigErr) {
+      console.error(err.SSigLog);
+      res.send(err.SSigMsg);
+    } else {
+      console.error(err, "!Unhandled error!");
+      res.status(500).send("ARG! You started the self-destruct sequence!");
+    }
   });
 });
 
