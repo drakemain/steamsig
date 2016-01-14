@@ -20,19 +20,22 @@ module.exports = function (userInfo) {
 
       .font("Arial")
       .fontSize(28)
-      .drawText(200, 28, userInfo.personaname)
+      .drawText(200, 28, userInfo.personaname);
 
       if (userInfo.communityvisibilitystate !== 3) {
         img
         .in('-page', '+0+0')
-        .in('assets/img/confidential.png')
+        .in('assets/img/confidential.png');
 
       } else {
+        var timeInfo = parseSteam.timecreated(userInfo.timecreated);
+
         img
         .fontSize(16)
         .drawText(200, 45, parseSteam.personastate(userInfo.personastate))
 
-        .drawText(200, 62, parseSteam.timecreated(userInfo.timecreated))
+        //.drawText(200, 62, timeInfo.dateCreated)
+        .drawText(200, 77, timeInfo.age);
 
       }
       
