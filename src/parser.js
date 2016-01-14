@@ -30,8 +30,6 @@ exports.timecreated = function(time) {
 
   var age = getAge(dateCreated);
 
-  console.log(age);
-
   var dateString = getMonthName(month) + " " + year;
   return {dateCreated: dateString, age: age};
 }
