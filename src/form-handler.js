@@ -1,4 +1,4 @@
-var promise = require('bluebird');
+var Promise = require('bluebird');
 var express = require('express');
 var request = require('request');
 
@@ -34,7 +34,7 @@ exports.renderProfile = function(key, uInput) {
 
 var getUserData = function(uri) {
 
-  return new promise(function(resolve, reject) {
+  return new Promise(function(resolve, reject) {
     request({uri: uri, timeout:6000}, function(err, res, body) {
       if (!err) {
         var userData = JSON.parse(body);
