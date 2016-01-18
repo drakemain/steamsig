@@ -1,3 +1,5 @@
+"use strict";
+
 var exports = module.exports = {};
 
 exports.personastate = function(state) {
@@ -35,7 +37,7 @@ exports.timecreated = function(time) {
 }
 
 function getMonthName(month) {
-  months = ["January", "February", "March", 
+  var months = ["January", "February", "March", 
     "April", "May", "June", "July", "August",
     "September", "October", "November",
     "December"];
@@ -59,25 +61,3 @@ function getAge(dateCreated) {
 
     return age;
 }
-
-/*function getAge(dateCreated) {
-  var now = new Date();
-
-  var years = now.getFullYear() - dateCreated.getFullYear(),
-      months = now.getMonth() - dateCreated.getMonth();
-      
-  var age;
-
-  if (months < 0) {
-    years = years - 1;
-    months = 12 + months;
-  }
-
-  if (years >= 1) {
-    age += years + " years";
-  }
-
-  if (months >= 0) {
-
-  }
-}*/

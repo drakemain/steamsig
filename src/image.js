@@ -1,3 +1,5 @@
+"use strict";
+
 var fs    = require('fs'),
     path  = require('path'),
     gm    = require('gm'),
@@ -9,7 +11,7 @@ module.exports = function (userInfo) {
 
     getUserDirectory(userInfo.steamid)
     .then(function(userDir) {
-      filePath = path.join(userDir, 'sig.png')
+      var filePath = path.join(userDir, 'sig.png')
 
       var img = gm()
       .in('-page', '+0+0')

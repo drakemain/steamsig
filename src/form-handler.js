@@ -1,5 +1,6 @@
+"use strict";
+
 var Promise = require('bluebird');
-var express = require('express');
 var request = require('request');
 
 var validate = require('./validate');

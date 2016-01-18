@@ -1,14 +1,17 @@
-var path    = require('path');
-var fs      = require('fs');
-var express = require('express');
-var hbars   = require('express-handlebars');
-var bparse  = require('body-parser');
-var path    = require('path');
+"use strict";
 
-var form    = require('./src/form-handler');
-var SteamSigErrors = require('./src/error')
+var path     = require('path');
+var fs       = require('fs');
+var readline = require('readline');
+var express  = require('express');
+var hbars    = require('express-handlebars');
+var bparse   = require('body-parser');
+var path     = require('path');
 
-app = express();
+var form           = require('./src/form-handler');
+var SteamSigErrors = require('./src/error');
+
+var app = express();
 app.use(bparse.json());
 app.use(bparse.urlencoded({ extended: true }));
 app.engine('handlebars', hbars({defaultLayout: 'main'}));
@@ -79,7 +82,6 @@ var steamKeyCheck = function() {
 
     } else {
 
-      var readline = require('readline');
       var rl = readline.createInterface({
         input: process.stdin,
         output: process.stdout

@@ -1,3 +1,5 @@
+"use strict";
+
 var request = require('request');
 var Promise = require('bluebird');
 var fs      = require('fs');
@@ -66,8 +68,4 @@ function resolveVanityName(key, name) {
       }
     });
   });
-}
-
-function checkProfileExists(profileID) {
-
 }
