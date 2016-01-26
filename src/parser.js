@@ -3,25 +3,16 @@
 var exports = module.exports = {};
 
 exports.personastate = function(state) {
-  switch (state) {
-    case 0:
-      return "Offline";
-
-    case 1:
-      return "Online";
-
-    case 2:
-      return "Busy"
-
-    case 3:
-      return "Away";
-
-    case 4:
-      return "Snooze";
-
-    case 5:
-      return "Looking to trade";
-  }
+  var states = [
+    "Offline", 
+    "Online", 
+    "Busy", 
+    "Away",
+    "Snooze",
+    "Looking to trade"
+    ];
+  
+  return states[state];
 }
 
 exports.timecreated = function(time) {
@@ -37,12 +28,22 @@ exports.timecreated = function(time) {
 }
 
 function getMonthName(month) {
-  var months = ["January", "February", "March", 
-    "April", "May", "June", "July", "August",
-    "September", "October", "November",
-    "December"];
+  var months = [
+    "January", 
+    "February", 
+    "March", 
+    "April", 
+    "May", 
+    "June", 
+    "July", 
+    "August",
+    "September", 
+    "October", 
+    "November",
+    "December"
+  ];
 
-    return months[month];
+  return months[month];
 }
 
 function getAge(dateCreated) {
