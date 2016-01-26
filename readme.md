@@ -2,10 +2,14 @@ Generates a steam profile png image. It will display dynamic information (such a
 
 ##Soon-to-be features: 
 >Caching to reduce API calls and rendering overhead.
+
 >Customization options
 >>Color palette
+
 >>Size
+
 >>Template/Layout
+
 >>What information is displayed
 
 Graphics Magick binaries are needed for this to run. They can be obtained at http://www.graphicsmagick.org/.
