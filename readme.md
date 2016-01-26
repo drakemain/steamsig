@@ -3,6 +3,8 @@ Generates a steam profile png image. It will display dynamic information (such a
 ##Soon-to-be features: 
 >Caching to reduce API calls and rendering overhead.
 
+>Nicer client-side form
+
 >Customization options
 >>Color palette
 
