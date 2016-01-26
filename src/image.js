@@ -56,7 +56,7 @@ module.exports = function (userInfo) {
 function getUserDirectory(steamid) {
   var userDir = path.join('assets', 'profiles', steamid);
 
-  return new Promise(function (resolve, reject) {
+  return new Promise(function (resolve) {
     fs.stat(userDir, function(err, stats) {
 
       if (!stats) {
