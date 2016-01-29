@@ -27,9 +27,9 @@ exports.renderProfile = function(key, uInput) {
   .then(function(userData) {
     console.log(userData.steamid);
     return getUserDirectory(userData.steamid).then(function(userDir) {
-      console.log(userDir);
       userData.lastAPICall = new Date();
-      return cacheUserData(userData, userDir);
+      userDate.userDirecotry = userDir;
+      cacheUserData(userData, userDir).then(Promise.resolve(path.join(userDir, "sig.png")));
     })
   })
 }
@@ -68,9 +68,6 @@ var buildURI = function(APIkey, method, SteamID) {
 var cacheUserData = function(userData, userDir) {
   return new Promise(function(resolve, reject) {
     var filePath = path.join(userDir, 'userData.JSON');
-
-    console.log(filePath);
-
     var userDataString = JSON.stringify(userData);
 
     fs.writeFile(filePath, userDataString, function(err) {

@@ -45,6 +45,7 @@ app.get('/profile/:user', function(req, res) {
   form.renderProfile(key, req.params.user)
 
   .then(function(profileImg) {
+    console.log(profileImg);
     res.sendFile(path.resolve(profileImg));
   })
 
