@@ -17,9 +17,9 @@ exports.renderProfile = function(key, uInput) {
 
     console.time("API");
     var userData = getUserData(URI);
-    console.timeEnd("API");
+    
 
-    userData.then(imgProcess);
+    userData.tap(console.time("imgProcess")).then(imgProcess).tap(console.timeEnd("imgProcess"));
 
     return userData;
   })
@@ -34,7 +34,9 @@ exports.renderProfile = function(key, uInput) {
       return cacheUserData(userData);
     })
 
-    .then(Promise.resolve(userData.sigPath));
+    .then(function() {
+      return Promise.resolve(userData.sigPath)
+    });
   })
 }
 
