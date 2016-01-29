@@ -9,39 +9,34 @@ var validate = require('./validate');
 var SteamSigError = require('./error');
 var imgProcess = require('./image');
 
-var exports = module.exports = {};
-
 exports.renderProfile = function(key, uInput) {
   return validate.steamid(key, uInput)
 
-  .tap(function() {
-    console.time("API");
-  })
-
   .then(function(steamid) {
     var URI = buildURI(key, "ISteamUser/GetPlayerSummaries/v0002", steamid);
-    return getUserData(URI);
+
+    console.time("API");
+    var userData = getUserData(URI);
+    console.timeEnd("API");
+
+    userData.then(imgProcess);
+
+    return userData;
   })
 
   .then(function(userData) {
-    userData.lastAPICall = new Date();
-    writeUserData(userData);
-    return Promise.resolve(userData);
-  })
-
-  .tap(function() {
-    console.timeEnd("API");
-    console.time("imgProcess");
-  })
-
-  .then(imgProcess)
-
-  .tap(function() {
-    console.timeEnd("imgProcess");
+    console.log(userData.steamid);
+    return getUserDirectory(userData.steamid).then(function(userDir) {
+      console.log(userDir);
+      userData.lastAPICall = new Date();
+      return cacheUserData(userData, userDir);
+    })
   })
 }
 
-exports.writeUserData = writeUserData;
+exports.cacheUserData = cacheUserData;
+
+exports.getUserDirectory = getUserDirectory;
 
 var getUserData = function(uri) {
 
@@ -70,9 +65,11 @@ var buildURI = function(APIkey, method, SteamID) {
     + "&steamids=" + SteamID;
 }
 
-var writeUserData = function(userData) {
+var cacheUserData = function(userData, userDir) {
   return new Promise(function(resolve, reject) {
-    var filePath = path.join('assets', 'profiles', userData.steamid, 'userData.JSON');
+    var filePath = path.join(userDir, 'userData.JSON');
+
+    console.log(filePath);
 
     var userDataString = JSON.stringify(userData);
 
@@ -84,4 +81,21 @@ var writeUserData = function(userData) {
       }
     })
   })
+}
+
+var getUserDirectory = function(steamid) {
+  var userDir = path.join('assets', 'profiles', steamid);
+
+  return new Promise(function (resolve) {
+    fs.stat(userDir, function(err, stats) {
+
+      if (!stats) {
+        fs.mkdir(userDir, function() {
+          resolve(userDir);
+        });
+
+      } else {resolve(userDir);}   
+    });
+  });
+
 }
