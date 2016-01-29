@@ -25,12 +25,16 @@ exports.renderProfile = function(key, uInput) {
   })
 
   .then(function(userData) {
-    console.log(userData.steamid);
-    return getUserDirectory(userData.steamid).then(function(userDir) {
+    return getUserDirectory(userData.steamid)
+
+    .then(function(userDir) {
       userData.lastAPICall = new Date();
-      userDate.userDirecotry = userDir;
-      cacheUserData(userData, userDir).then(Promise.resolve(path.join(userDir, "sig.png")));
+      userData.userDirecotry = userDir;
+      userData.sigPath = path.join(userDir, "sig.png");
+      return cacheUserData(userData);
     })
+
+    .then(Promise.resolve(userData.sigPath));
   })
 }
 
@@ -65,16 +69,17 @@ var buildURI = function(APIkey, method, SteamID) {
     + "&steamids=" + SteamID;
 }
 
-var cacheUserData = function(userData, userDir) {
+var cacheUserData = function(userData) {
   return new Promise(function(resolve, reject) {
-    var filePath = path.join(userDir, 'userData.JSON');
+    var filePath = path.join(userData.userDirecotry, 'userData.JSON');
+    console.log(filePath);
     var userDataString = JSON.stringify(userData);
 
     fs.writeFile(filePath, userDataString, function(err) {
       if (err) {
         reject(err);
       } else {
-        resolve()
+        resolve(userData);
       }
     })
   })
@@ -94,5 +99,4 @@ var getUserDirectory = function(steamid) {
       } else {resolve(userDir);}   
     });
   });
-
 }
