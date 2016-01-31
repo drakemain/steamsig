@@ -45,7 +45,6 @@ app.get('/profile/:user', function(req, res) {
   form.renderProfile(key, req.params.user)
 
   .then(function(profileImg) {
-    console.log(profileImg);
     res.sendFile(path.resolve(profileImg));
   })
 
@@ -54,11 +53,11 @@ app.get('/profile/:user', function(req, res) {
     res.status(400).send("The name or ID could not be associated to a Steam account.");
   })
   .catch(SteamSigErrors.TimeOut, function(err) {
-    console.log(err.message);
+    console.error(err.message);
     res.status(504).send("Steam is not responding to requests!");
   })
   .catch(function(err) {
-    console.log("An unhandled error occured.");
+    console.trace("An unhandled error occured.");
     console.error(err);
     res.status(500).send("ARG! You've destroyed everything!")
   });
