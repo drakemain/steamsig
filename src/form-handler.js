@@ -12,32 +12,38 @@ var imgProcess = require('./image');
 exports.renderProfile = function(key, uInput) {
   return validate.steamid(key, uInput)
 
+  .tap(function() {console.time("API");})
+
   .then(function(steamid) {
     var URI = buildURI(key, "ISteamUser/GetPlayerSummaries/v0002", steamid);
-
-    console.time("API");
-    var userData = getUserData(URI);
-    
-
-    userData.tap(console.time("imgProcess")).then(imgProcess).tap(console.timeEnd("imgProcess"));
-
-    return userData;
+    return getUserData(URI);
   })
 
+  .tap(function() {console.timeEnd("API");})
+
   .then(function(userData) {
+
     return getUserDirectory(userData.steamid)
 
     .then(function(userDir) {
-      userData.lastAPICall = new Date();
-      userData.userDirecotry = userDir;
-      userData.sigPath = path.join(userDir, "sig.png");
-      return cacheUserData(userData);
-    })
 
-    .then(function() {
-      return Promise.resolve(userData.sigPath)
+      userData.lastAPICall = new Date();
+      userData.userDirectory = userDir;
+      userData.sigPath = path.join(userDir, "sig.png");
+
+      return cacheUserData(userData);
     });
   })
+
+  .then(function(userData) {
+    return cacheUserData(userData);
+  })
+
+  .tap(function() {console.time("imgProcess")})
+
+  .then(imgProcess)
+
+  .tap(function() {console.timeEnd("imgProcess")});
 }
 
 exports.cacheUserData = cacheUserData;
@@ -73,8 +79,7 @@ var buildURI = function(APIkey, method, SteamID) {
 
 var cacheUserData = function(userData) {
   return new Promise(function(resolve, reject) {
-    var filePath = path.join(userData.userDirecotry, 'userData.JSON');
-    console.log(filePath);
+    var filePath = path.join(userData.userDirectory, 'userData.JSON');
     var userDataString = JSON.stringify(userData);
 
     fs.writeFile(filePath, userDataString, function(err) {
