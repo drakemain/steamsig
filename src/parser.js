@@ -1,7 +1,5 @@
 "use strict";
 
-var exports = module.exports = {};
-
 exports.personastate = function(state) {
   var states = [
     "Offline", 
