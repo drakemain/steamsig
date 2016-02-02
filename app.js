@@ -8,7 +8,7 @@ var hbars    = require('express-handlebars');
 var bparse   = require('body-parser');
 var path     = require('path');
 
-var form           = require('./src/form-handler');
+var profile           = require('./src/profile');
 var SteamSigErrors = require('./src/error');
 
 var app = express();
@@ -40,25 +40,26 @@ app.get('/form-handler', function(req, res) {
 });
 
 app.get('/profile/:user', function(req, res) {
-  console.log(new Date() + ': /profile/' + req.params.user);
+  console.log('--Render: ', new Date() + ': /profile/' + req.params.user);
 
-  form.renderProfile(key, req.params.user)
+  profile.render(key, req.params.user)
 
   .then(function(profileImg) {
-    res.sendFile(path.resolve(profileImg));
+    res.status(200).sendFile(path.resolve(profileImg));
   })
 
   .catch(SteamSigErrors.Validation, function(err) {
     console.error(err.message);
-    res.status(400).send("The name or ID could not be associated to a Steam account.");
+    res.status(400).send("The name or ID doesn't seem to be associated with a Steam account.");
   })
   .catch(SteamSigErrors.TimeOut, function(err) {
     console.error(err.message);
     res.status(504).send("Steam is not responding to requests!");
   })
   .catch(function(err) {
-    console.trace("An unhandled error occured.");
-    console.error(err);
+    console.error("An unhandled error occured.");
+    console.trace(err.stack);
+    
     res.status(500).send("ARG! You've destroyed everything!")
   });
 });
