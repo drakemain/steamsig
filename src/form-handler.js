@@ -34,11 +34,7 @@ exports.renderProfile = function(key, uInput) {
       return cacheUserData(userData);
     });
   })
-
-  .then(function(userData) {
-    return cacheUserData(userData);
-  })
-
+  
   .tap(function() {console.time("imgProcess")})
 
   .then(imgProcess)
