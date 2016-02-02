@@ -20,3 +20,12 @@ function TimeOut() {
 util.inherits(TimeOut, Error);
 
 exports.TimeOut = TimeOut;
+
+function FileDNE() {
+  Error.captureStackTrace(this, this.constructor);
+  this.message = "Attempted to read file that doesn't exist."
+}
+
+util.inherits(FileDNE, Error);
+
+exports.FileDNE = FileDNE;
