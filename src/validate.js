@@ -9,20 +9,6 @@ var SteamSigError = require('./error')
 var exports = module.exports = {};
 
 exports.steamid = function(key, input) {
-  return validateSteamID(key, input)
-}
-
-exports.profileExists = function(profileID) {
-  var profileDir = path.join('assets', 'profiles', profileID);
-
-  fs.stat(profileDir, function(err, stats) {
-    
-    return !!stats
-
-  });
-}
-
-function validateSteamID(key, input) {
   var trimmedInput = input
     .replace(/\\/g, '')
     .replace(/\//g, '')
@@ -37,6 +23,19 @@ function validateSteamID(key, input) {
   } else {
     return Promise.resolve(trimmedInput);
   }
+}
+
+exports.checkFileExists = function(filePath) {
+  return new Promise(function(resolve, reject) {
+    fs.stat(filePath, function(err, stats) {
+      if (!stats) {
+        reject(SteamSigError.FileDNE);
+      } else {
+        resolve(filePath);
+      }
+    });
+  
+  })
 }
 
 function resolveVanityName(key, name) {
