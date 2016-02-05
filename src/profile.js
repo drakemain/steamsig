@@ -78,6 +78,7 @@ var buildURI = function(APIkey, method, SteamID) {
 }
 
 var cacheUserData = function(userData) {
+
   return new Promise(function(resolve, reject) {
     var filePath = path.join(userData.userDirectory, 'userData.JSON');
     var userDataString = JSON.stringify(userData);
@@ -89,7 +90,7 @@ var cacheUserData = function(userData) {
         resolve(userData);
       }
     })
-  })
+  });
 }
 
 var getCachedData = function(steamid) {
