@@ -8,8 +8,10 @@ var hbars    = require('express-handlebars');
 var bparse   = require('body-parser');
 var path     = require('path');
 
-var profile           = require('./src/profile');
+var validate = require('./src/validate');
+var profile        = require('./src/profile');
 var SteamSigErrors = require('./src/error');
+var init = require('./src/initialize');
 
 var app = express();
 app.use(bparse.json());
@@ -64,61 +66,6 @@ app.get('/profile/:user', function(req, res) {
   });
 });
 
-var steamKeyCheck = function() {
-  console.log("Checking for a Steam API Key...");
-
-  var keyFile = path.join('config', 'key.txt');
-
-  fs.exists(keyFile, function(exists) {
-    if (exists) {
-      console.log("...Key found. Fetching...");
-
-      fs.readFile(keyFile, function(err, data) {
-        if (!err) {
-          key = data.toString();
-
-          console.log("...Key fetched!\n");
-        }
-      });
-
-    } else {
-
-      var rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout
-      });
-
-      console.log("\n...Steam API Key not found!\nIf you don't have a key, get one at https://steamcommunity.com/dev.");
-      rl.setPrompt("Enter your steam API key: ");
-      rl.prompt()
-      rl.on("line", function(data) {
-          data = data.trim();
-          fs.mkdir('./config')
-          fs.writeFile(keyFile, data, function(err) {
-            if (err) {console.log(err);}
-            else {console.log("Key has been saved.\n");}
-            key = data;
-          })
-          rl.close();
-        })
-
-    }
-  })
-}
-
-var init = function() {
-
-  fs.stat('assets/profiles', function(err, stats) {
-    if (!stats) {
-      fs.mkdir('assets/profiles', function() {
-        console.log("Created profiles directory.");
-      });
-    }
-  });
-
-  steamKeyCheck();
-  app.listen(3000);
-  console.log("App started listening on port 3000.");
-}
-
 init();
+app.listen(3000);
+console.log("App started listening on port 3000.");
