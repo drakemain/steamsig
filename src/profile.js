@@ -111,8 +111,6 @@ var getCachedData = function(steamid) {
 var getUserDirectory = function(steamid) {
   var userDir = path.join('assets', 'profiles', steamid);
 
-  console.log(userDir);
-
   return new Promise(function (resolve) {
     fs.stat(userDir, function(err, stats) {
       if (!stats) {
