@@ -1,14 +1,11 @@
 "use strict";
 
 var path     = require('path');
-var fs       = require('fs');
-var readline = require('readline');
 var express  = require('express');
 var hbars    = require('express-handlebars');
 var bparse   = require('body-parser');
 var path     = require('path');
 
-var validate = require('./src/validate');
 var profile        = require('./src/profile');
 var SteamSigErrors = require('./src/error');
 var init = require('./src/initialize');
@@ -66,6 +63,12 @@ app.get('/profile/:user', function(req, res) {
   });
 });
 
-init();
+init().then(function(steamKey) {
+  key = steamKey;
+  console.log("Ready.\n");
+}).catch(function(err) {
+  console.trace(err.stack);
+});
+
 app.listen(3000);
-console.log("App started listening on port 3000.");
+console.log("--App started listening on port 3000.");
