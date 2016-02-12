@@ -1,105 +1,69 @@
-var Promise = require('bluebird');
-var fs      = Promise.promisifyAll(require('fs'));
-var readline = require('readline');
-var path = require('path');
+"use strict";
 
-var SteamSigErrors = require('./error');
+var Promise  = require('bluebird');
+var fs       = Promise.promisifyAll(require('fs'));
+var readline = require('readline');
+var path     = require('path');
+
+module.exports = function() {
+  return checkDirExists(path.join('assets', 'profiles'))
+  .then(steamKeyCheck);
+}
 
 var steamKeyCheck = function() {
-  console.log("Checking for a Steam API Key...");
+  console.log("--Checking for a Steam API Key...")
 
   var keyFile = path.join('config', 'key.txt');
 
-  fs.stat(keyFile, function(err, stats) {
-    if (stats) {
-      console.log("..Key found. Fetching..");
-      
+  var keyCheck = fs.statAsync(keyFile).catch(function(err) {
+    if (err) {
+      return makeSteamKey(keyFile);
     }
-  })
+  });
 
-
-  fs.exists(keyFile, function(exists) {
-    if (exists) {
-      console.log("...Key found. Fetching...");
-
-      fs.readFile(keyFile, function(err, data) {
-        if (!err) {
-          key = data.toString();
-
-          console.log("...Key fetched!\n");
-        }
-      });
-
-    } else {
-
-      var rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout
-      });
-
-      console.log("\n...Steam API Key not found!\nIf you don't have a key, get one at https://steamcommunity.com/dev.");
-      rl.setPrompt("Enter your steam API key: ");
-      rl.prompt()
-      rl.on("line", function(data) {
-          data = data.trim();
-          fs.mkdir('./config')
-          fs.writeFile(keyFile, data, function(err) {
-            if (err) {console.log(err);}
-            else {console.log("Key has been saved.\n");}
-            key = data;
-          })
-          rl.close();
-        })
-
-    }
-  })
-}
-
-var checkDirectories = function() {
-  var dirList = [
-    'config',
-    path.join('assets, profiles')
-  ];
-
-  return new Promise(function(resolve, reject) {
-    for (var i in dirList) {
-    fs.statAsync(dirList[i])
-
-    .then(function(err, stats) {
-      if(!stats) {
-        fs.mkdirAsync(dirList[i])
-        .then(function() {console.log("Created directory:", dirList[i])});
-      }
-    });
-  }})
-}
-
-module.exports = function() {
-  checkDirectories()
-
-  /*validate.checkFileExists('config')
-
-  .catch(SteamSigErrors.FileDNE, function() {
-    fs.mkdir('config', function(err) {
+  return Promise.join(checkDirExists('config'), keyCheck).then(function() {
+    return fs.readFileAsync(keyFile).then(function(data, err) {
       if (!err) {
-        console.log("Created 'config' directory.");
+        console.log("...key fetched!");
+        return Promise.resolve(data.toString());
+      } else {
+        return Promise.reject(err);
       }
     });
   });
+}
 
-  validate.CheckFileExists(path.join('assets', 'profiles'))
+var makeSteamKey = function(filePath) {
+  var rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
 
-  .catch(SteamSigErrors.FileDNE, function() {
-    fs.mkdir()
-  })
+  console.log("...Steam API Key not found!\nIf you don't have a key, get one at https://steamcommunity.com/dev.");
+  rl.setPrompt("Enter your Steam API key:");
+  rl.prompt();
 
-  fs.stat('assets/profiles', function(err, stats) {
-    if (!stats) {
-      fs.mkdir('assets/profiles', function() {
-        console.log("Created profiles directory.");
+  return new Promise(function(resolve) {
+    rl.on("line", function(data) {
+      data = data.trim();
+
+      fs.writeFileAsync(filePath, data)
+
+      .then(function() {
+        rl.close();
+        console.log("Key has been saved.");
+        resolve(data);
+      }).catch(function(err) {
+        rl.close();
+        console.log(err);
       });
-    }
-  });*/
 
-  .then(steamKeyCheck);
+    });
+  });
+}
+
+var checkDirExists = function(dir) {
+  return fs.statAsync(dir).catch(function() {
+    fs.mkdir(dir);
+  })
 }
