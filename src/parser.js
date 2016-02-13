@@ -1,5 +1,8 @@
 "use strict";
 
+var buildURI = require('./profile').buildURI;
+var callSteamAPI = require('./profile').callSteamAPI;
+
 exports.personastate = function(state) {
   var states = [
     "Offline", 
@@ -25,6 +28,20 @@ exports.timecreated = function(time) {
   return {dateCreated: dateString, age: age};
 }
 
+exports.currentGame = function(gameID, dataToReturn) {
+  var URI = buildURI(process.env.STEAM_KEY, "ISteamUserStats/GetSchemaForGame/v2", gameID);
+
+  return callSteamAPI(URI)
+
+  .then(function(gameSchema) {
+    if (dataToReturn) {
+      return gameSchema.game[dataToReturn];
+    } else {
+      return gameSchema;
+    }
+  });
+}
+
 function getMonthName(month) {
   var months = [
     "January", 
@@ -45,18 +62,18 @@ function getMonthName(month) {
 }
 
 function getAge(dateCreated) {
-    var today = new Date();
-    var years = today.getFullYear() - dateCreated.getFullYear();
-    var months = today.getMonth() - dateCreated.getMonth();
-    
-    if (months < 0 || (months === 0 && today.getDate() < dateCreated.getDate())) {
-        years--;
-        months += 12;
-    }
+  var today = new Date();
+  var years = today.getFullYear() - dateCreated.getFullYear();
+  var months = today.getMonth() - dateCreated.getMonth();
+  
+  if (months < 0 || (months === 0 && today.getDate() < dateCreated.getDate())) {
+      years--;
+      months += 12;
+  }
 
-    var age = years.toString() + '.' + 
-      Math.floor((months - today.getMonth()) * 10000 / 12).toString().substr(0, 1) + 
-      " years";
+  var age = years.toString() + '.' + 
+    Math.floor((months - today.getMonth()) * 10000 / 12).toString().substr(0, 1) + 
+    " years";
 
-    return age;
+  return age;
 }
