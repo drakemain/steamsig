@@ -12,7 +12,7 @@ var imgProcess = require('./image');
 exports.cacheUserData = cacheUserData;
 exports.getCachedData = getCachedData;
 exports.getUserDirectory = getUserDirectory;
-exports.getUserData = getUserData;
+exports.callSteamAPI = callSteamAPI;
 exports.buildURI = buildURI;
 
 exports.render = function(uInput) {
@@ -22,7 +22,11 @@ exports.render = function(uInput) {
 
   .then(function(steamid) {
     var URI = buildURI(process.env.STEAM_KEY, "ISteamUser/GetPlayerSummaries/v0002", steamid);
-    return getUserData(URI);
+    return callSteamAPI(URI)
+
+    .then(function(responseData) {
+      return responseData.response.players[0];
+    });
   })
 
   .tap(function() {console.timeEnd("API");})
@@ -48,14 +52,14 @@ exports.render = function(uInput) {
   .tap(function() {console.timeEnd("imgProcess")});
 }
 
-var getUserData = function(uri) {
+function callSteamAPI(uri) {
 
   return new Promise(function(resolve, reject) {
     request({uri: uri, timeout:6000}, function(err, res, body) {
       if (!err) {
         var userData = JSON.parse(body);
 
-        resolve(userData.response.players[0]);
+        resolve(userData);
       }
     })
     .on('error', function(err) {
@@ -68,14 +72,22 @@ var getUserData = function(uri) {
   });
 }
 
-var buildURI = function(APIkey, method, SteamID) {
-  return "https://api.steampowered.com/"
-    + method
-    + "/?key=" + APIkey
-    + "&steamids=" + SteamID;
+function buildURI(APIkey, method, ID) {
+  var URI = "https://api.steampowered.com/"
+    + method + "/?key=" + APIkey;
+
+    if (method === "ISteamUser/GetPlayerSummaries/v0002") {
+      URI += "&steamids=";
+    } else if (method === "ISteamUserStats/GetSchemaForGame/v2") {
+      URI += "&appid=";
+    }
+
+  URI += ID;
+
+  return URI;
 }
 
-var cacheUserData = function(userData) {
+function cacheUserData(userData) {
 
   return new Promise(function(resolve, reject) {
     var filePath = path.join(userData.userDirectory, 'userData.JSON');
@@ -91,7 +103,7 @@ var cacheUserData = function(userData) {
   });
 }
 
-var getCachedData = function(steamid) {
+function getCachedData(steamid) {
   return getUserDirectory(steamid)
 
   .then(function(dir) {
@@ -106,7 +118,7 @@ var getCachedData = function(steamid) {
   });
 }
 
-var getUserDirectory = function(steamid) {
+function getUserDirectory(steamid) {
   var userDir = path.join('assets', 'profiles', steamid);
 
   return new Promise(function (resolve) {
