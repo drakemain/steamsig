@@ -5,4 +5,5 @@ assets/profiles/
 .bak/
 
 config/key.txt
+config/.env
 .eslintrc
