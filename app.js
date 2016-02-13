@@ -16,10 +16,9 @@ app.use(bparse.urlencoded({ extended: true }));
 app.engine('handlebars', hbars({defaultLayout: 'main'}));
 app.set('view engine', 'handlebars');
 
-var key;
-
 app.get('/', function(req, res) {
-  if (key) {
+  if (process.env.STEAM_KEY) {
+    console.log(process.env.STEAM_KEY);
     res.redirect('/steamIDForm');
   } else {
     res.send("No steam key has been set! A steam API Key" +
@@ -41,7 +40,7 @@ app.get('/form-handler', function(req, res) {
 app.get('/profile/:user', function(req, res) {
   console.log('--Render: ', new Date() + ': /profile/' + req.params.user);
 
-  profile.render(key, req.params.user)
+  profile.render(req.params.user)
 
   .then(function(profileImg) {
     res.status(200).sendFile(path.resolve(profileImg));
@@ -63,12 +62,7 @@ app.get('/profile/:user', function(req, res) {
   });
 });
 
-init().then(function(steamKey) {
-  key = steamKey;
-  console.log("Ready.\n");
-}).catch(function(err) {
-  console.trace(err.stack);
-});
+init()
 
 app.listen(3000);
 console.log("--App started listening on port 3000.");

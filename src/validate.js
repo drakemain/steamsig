@@ -6,7 +6,7 @@ var fs      = require('fs');
 
 var SteamSigError = require('./error');
 
-exports.steamid = function(key, input) {
+exports.steamid = function(input) {
   var trimmedInput = input
     .replace(/\\/g, '')
     .replace(/\//g, '')
@@ -16,7 +16,7 @@ exports.steamid = function(key, input) {
     || trimmedInput.length !== 17
     || isNaN(trimmedInput.substr(8,16))) {
 
-    return resolveVanityName(key, trimmedInput)
+    return resolveVanityName(process.env.STEAM_KEY, trimmedInput)
 
   } else {
     return Promise.resolve(trimmedInput);
@@ -41,7 +41,7 @@ exports.checkFileExists = function(filePath) {
 }
 
 function resolveVanityName(key, name) {
-
+  
   var apiRequest = "http://api.steampowered.com/ISteamUser"
     + "/ResolveVanityURL/v0001/?key=" + key + "&vanityurl="
     + name;

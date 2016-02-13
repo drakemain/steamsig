@@ -10,20 +10,18 @@ var SteamSigError = require('./error');
 var imgProcess = require('./image');
 
 exports.cacheUserData = cacheUserData;
-
 exports.getCachedData = getCachedData;
-
 exports.getUserDirectory = getUserDirectory;
-
 exports.getUserData = getUserData;
+exports.buildURI = buildURI;
 
-exports.render = function(key, uInput) {
-  return validate.steamid(key, uInput)
+exports.render = function(uInput) {
+  return validate.steamid(uInput)
 
   .tap(function() {console.time("API");})
 
   .then(function(steamid) {
-    var URI = buildURI(key, "ISteamUser/GetPlayerSummaries/v0002", steamid);
+    var URI = buildURI(process.env.STEAM_KEY, "ISteamUser/GetPlayerSummaries/v0002", steamid);
     return getUserData(URI);
   })
 

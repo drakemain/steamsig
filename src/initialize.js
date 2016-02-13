@@ -7,7 +7,15 @@ var path     = require('path');
 
 module.exports = function() {
   return checkDirExists(path.join('assets', 'profiles'))
-  .then(steamKeyCheck);
+  .then(steamKeyCheck)
+  .then(function(key) {
+    process.env.STEAM_KEY = key;
+  })
+
+  .catch(function(err) {
+    console.error("An unhandled init error occured!");
+    console.trace(err);
+  });
 }
 
 var steamKeyCheck = function() {
