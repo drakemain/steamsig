@@ -20,7 +20,6 @@ app.set('view engine', 'handlebars');
 
 app.get('/', function(req, res) {
   if (process.env.STEAM_KEY) {
-    console.log(process.env.STEAM_KEY);
     res.redirect('/steamIDForm');
   } else {
     res.send("No steam key has been set! A steam API Key" +
