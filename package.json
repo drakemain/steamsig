@@ -1,5 +1,5 @@
 {
-  "name": "steam_sig_generator",
+  "name": "steamsig",
   "version": "0.5.0",
   "description": "uses steam api to generate a customaizable steam profile image",
   "dependencies": {
