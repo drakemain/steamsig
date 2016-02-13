@@ -1,5 +1,7 @@
 "use strict";
 
+require('dotenv').config({path: './config/.env', silent: true})
+
 var path     = require('path');
 var express  = require('express');
 var hbars    = require('express-handlebars');
@@ -62,7 +64,8 @@ app.get('/profile/:user', function(req, res) {
   });
 });
 
-init()
+init();
 
-app.listen(3000);
-console.log("--App started listening on port 3000.");
+process.env.PORT = process.env.PORT || 3000;
+app.listen(process.env.PORT);
+console.log("--App started listening on port", process.env.PORT);
