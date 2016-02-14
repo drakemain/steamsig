@@ -6,6 +6,7 @@ var path  = require('path'),
     parseSteam = require("./parser");
 
 module.exports = function (userInfo) {
+  console.time("imgProcess");
   return new Promise(function(resolve, reject) {
 
     var userDir = userInfo.userDirectory;
@@ -33,20 +34,22 @@ module.exports = function (userInfo) {
 
       img
       .fontSize(16)
-      .drawText(200, 45, parseSteam.personastate(userInfo.personastate))
-
-      //.drawText(200, 62, timeInfo.dateCreated)
       .drawText(200, 77, timeInfo.age);
 
+      if (userInfo.currentGame) {
+        img.drawText(200, 45, "In-Game: " + userInfo.currentGame);
+      } else {
+        img.drawText(200, 45, parseSteam.personastate(userInfo.personastate));
+      }
     }
     
     img
     .flatten()
 
     .write(filePath, function(err) {
+      console.timeEnd("imgProcess");
       if (!err) {resolve(filePath);}
       else {reject(err);}
     });
   });
-
 };
