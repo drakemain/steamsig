@@ -28,7 +28,7 @@ exports.timecreated = function(time) {
   return {dateCreated: dateString, age: age};
 }
 
-exports.currentGame = function(gameID, dataToReturn) {
+exports.game = function(gameID, dataToReturn) {
   var URI = buildURI(process.env.STEAM_KEY, "ISteamUserStats/GetSchemaForGame/v2", gameID);
 
   return callSteamAPI(URI)
