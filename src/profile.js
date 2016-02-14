@@ -8,6 +8,7 @@ var fs       = Promise.promisifyAll(require("fs"));
 var validate = require('./validate');
 var SteamSigError = require('./error');
 var imgProcess = require('./image');
+var parseGame = require('./parser').game;
 
 exports.cacheUserData = cacheUserData;
 exports.getCachedData = getCachedData;
@@ -17,9 +18,7 @@ exports.buildURI = buildURI;
 
 exports.render = function(uInput) {
   return validate.steamid(uInput)
-
   .tap(function() {console.time("API");})
-
   .then(function(steamid) {
     var URI = buildURI(process.env.STEAM_KEY, "ISteamUser/GetPlayerSummaries/v0002", steamid);
     return callSteamAPI(URI)
@@ -28,28 +27,26 @@ exports.render = function(uInput) {
       return responseData.response.players[0];
     });
   })
-
   .tap(function() {console.timeEnd("API");})
 
   .then(function(userData) {
+    return Promise.join(
+      parseGame(userData.gameid, 'gameName'),
+      getUserDirectory(userData.steamid),
 
-    return getUserDirectory(userData.steamid)
+      function(game, userDir) {
+        userData.lastAPICall = new Date();
+        userData.userDirectory = userDir;
+        userData.sigPath = path.join(userDir, "sig.png");
+        userData.currentGame = game;
+      }
+    )
 
-    .then(function(userDir) {
-
-      userData.lastAPICall = new Date();
-      userData.userDirectory = userDir;
-      userData.sigPath = path.join(userDir, "sig.png");
-
-      return cacheUserData(userData);
+    .then(function() {
+      cacheUserData(userData);
+      return imgProcess(userData);
     });
-  })
-  
-  .tap(function() {console.time("imgProcess")})
-
-  .then(imgProcess)
-
-  .tap(function() {console.timeEnd("imgProcess")});
+  });
 }
 
 function callSteamAPI(uri) {
@@ -124,7 +121,6 @@ function getUserDirectory(steamid) {
   return new Promise(function (resolve) {
     fs.stat(userDir, function(err, stats) {
       if (!stats) {
-
 
         fs.mkdir(userDir, function() {
           resolve(userDir);
