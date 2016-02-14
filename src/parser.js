@@ -1,7 +1,6 @@
 "use strict";
 
-var buildURI = require('./profile').buildURI;
-var callSteamAPI = require('./profile').callSteamAPI;
+var profile = require('./profile');
 
 exports.personastate = function(state) {
   var states = [
@@ -29,17 +28,21 @@ exports.timecreated = function(time) {
 }
 
 exports.game = function(gameID, dataToReturn) {
-  var URI = buildURI(process.env.STEAM_KEY, "ISteamUserStats/GetSchemaForGame/v2", gameID);
+  var URI = profile.buildURI(process.env.STEAM_KEY, "ISteamUserStats/GetSchemaForGame/v2", gameID);
 
-  return callSteamAPI(URI)
-
-  .then(function(gameSchema) {
-    if (dataToReturn) {
-      return gameSchema.game[dataToReturn];
-    } else {
-      return gameSchema;
-    }
-  });
+  if (gameID) {
+    return profile.callSteamAPI(URI)
+    .then(function(gameSchema) {
+      if (dataToReturn) {
+        return gameSchema.game[dataToReturn];
+      } else {
+        return gameSchema;
+      }
+    });
+  
+  } else {
+    return false;
+  }
 }
 
 function getMonthName(month) {
