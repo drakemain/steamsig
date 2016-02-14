@@ -11,5 +11,9 @@
     "gm": "^1.21.1",
     "request": "^2.65.0"
   },
-  "license": "BSD-3-Clause"
+  "license": "BSD-3-Clause",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/drakemain/steamsig.git"
+  }
 }
