@@ -7,22 +7,24 @@ var path  = require('path'),
 
 module.exports = function (userInfo) {
   console.time("imgProcess");
-  return new Promise(function(resolve, reject) {
+  var filePath = path.join(userInfo.userDirectory, 'sig.png')
 
-    var userDir = userInfo.userDirectory;
-    
-    var filePath = path.join(userDir, 'sig.png')
-
+  return new Promise(function(resolve, reject) {      
     var img = gm()
     .in('-page', '+0+0')
-    .in('assets/img/base-gray.png')
+    .in(path.join('assets', 'img', 'base-gray.png'))
 
     .in('-page', '+8+8')
     .in(userInfo.avatarfull.replace("https", "http"))
 
-    .font("Arial")
-    .fontSize(28)
-    .drawText(200, 28, userInfo.personaname);
+    .flatten()
+
+    .drawLine(200, 8, 491, 8)
+    .drawLine(200, 8, 200, 191)
+    .drawLine(491, 191, 200, 191)
+    .drawLine(491, 191, 491, 8)
+
+    .font("Arial").fontSize(28).drawText(208, 34, userInfo.personaname);
 
     if (userInfo.communityvisibilitystate !== 3) {
       img
@@ -30,23 +32,25 @@ module.exports = function (userInfo) {
       .in('assets/img/confidential.png');
 
     } else {
-      var timeInfo = parseSteam.timecreated(userInfo.timecreated);
+      img.fontSize(16)
 
-      img
-      .fontSize(16)
-      .drawText(200, 77, timeInfo.age);
-
-      if (userInfo.currentGame) {
-        img.drawText(200, 45, "In-Game: " + userInfo.currentGame);
+      if (userInfo.gameid) {
+        var gameStatus = "In-Game";
+        if (userInfo.currentGame) {gameStatus += ": " + userInfo.currentGame;}
+        img.drawText(216, 53, gameStatus);
       } else {
-        img.drawText(200, 45, parseSteam.personastate(userInfo.personastate));
+        img.drawText(216, 53, parseSteam.personastate(userInfo.personastate));
       }
-    }
-    
-    img
-    .flatten()
 
-    .write(filePath, function(err) {
+      /*img.drawLine(447, 17, 482, 17)
+      .drawLine(447, 17, 447, 52)
+      .drawLine(482, 52, 447, 52)
+      .drawLine(482, 52, 482, 17)*/
+
+      img.drawText(410, 29, parseSteam.timecreated(userInfo.timecreated).age);
+    }
+
+    img.write(filePath, function(err) {
       console.timeEnd("imgProcess");
       if (!err) {resolve(filePath);}
       else {reject(err);}
