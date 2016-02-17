@@ -52,7 +52,7 @@ exports.render = function(uInput) {
 function callSteamAPI(uri) {
 
   return new Promise(function(resolve, reject) {
-    request({uri: uri, timeout:6000}, function(err, res, body) {
+    request({uri: uri, timeout:1000}, function(err, res, body) {
       if (!err) {
         var userData = JSON.parse(body);
 
@@ -61,7 +61,7 @@ function callSteamAPI(uri) {
     })
     .on('error', function(err) {
       if (err.code === "ETIMEDOUT") {
-        reject(new SteamSigError.TimeOut());
+        reject(new SteamSigError.TimeOut(uri));
       } else {
         reject(err);
       }
@@ -106,7 +106,7 @@ function getCachedData(steamid) {
   .then(function(dir) {
     var dataPath = path.join(dir, "userData.JSON");
 
-    return validate.checkFileExists(dataPath)
+    return validate.checkFileExists(dataPath);
   })
 
   .then(function(dataPath) {
