@@ -12,8 +12,9 @@ util.inherits(Validation, Error);
 
 exports.Validation = Validation;
 
-function TimeOut() {
+function TimeOut(uri) {
   Error.captureStackTrace(this, this.constructor);
+  this.uri = uri;
   this.message = "Timed out while waiting for a Steam response."
 }
 
@@ -21,9 +22,10 @@ util.inherits(TimeOut, Error);
 
 exports.TimeOut = TimeOut;
 
-function FileDNE() {
+function FileDNE(filePath) {
   Error.captureStackTrace(this, this.constructor);
-  this.message = "Attempted to read file that doesn't exist."
+  this.filePath = filePath;
+  this.message = "Attempted to get file that doesn't exist."
 }
 
 util.inherits(FileDNE, Error);
