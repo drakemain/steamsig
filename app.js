@@ -11,6 +11,7 @@ var path     = require('path');
 var profile        = require('./src/profile');
 var SteamSigErrors = require('./src/error');
 var init = require('./src/initialize');
+var checkFileExists = require('./src/validate').checkFileExists;
 
 var app = express();
 app.use(bparse.json());
@@ -42,7 +43,6 @@ app.get('/profile/:user', function(req, res) {
   console.log('--Render: ', new Date() + ': /profile/' + req.params.user);
 
   profile.render(req.params.user)
-
   .then(function(profileImg) {
     res.status(200).sendFile(path.resolve(profileImg));
   })
@@ -53,7 +53,20 @@ app.get('/profile/:user', function(req, res) {
   })
   .catch(SteamSigErrors.TimeOut, function(err) {
     console.error(err.message);
-    res.status(504).send("Steam is not responding to requests!");
+    res.status(504);
+
+    var idPos = err.uri.search('&steamids=') + 10;
+    var steamid = err.uri.substr(idPos, 17);
+
+    return checkFileExists(path.join('assets', 'profiles', steamid, 'sig.png'))
+    .then(function(filePath) {
+      console.log('Cached profile sent');
+      res.sendFile(path.resolve(filePath));
+    })  
+  })
+  .catch(SteamSigErrors.FileDNE, function(err) {
+    console.error(err.message);
+    res.send("Your profile is not cached and Steam is not responding to requests!")
   })
   .catch(function(err) {
     console.error("An unhandled error occured.");
