@@ -6,21 +6,23 @@ var fs      = require('fs');
 
 var SteamSigErrors = require('./error');
 
-exports.steamid = function(input) {
-  var trimmedInput = input
-    .replace(/\\/g, '')
-    .replace(/\//g, '')
-    .trim();
- 
-  if (trimmedInput.substr(0,7) !== "7656119"
-    || trimmedInput.length !== 17
-    || isNaN(trimmedInput.substr(8,16))) {
+exports.steamid = function(input) { 
+  if (input.substr(0,7) !== "7656119"
+    || input.length !== 17
+    || isNaN(input.substr(8,16))) {
 
-    return resolveVanityName(process.env.STEAM_KEY, trimmedInput)
+    return resolveVanityName(process.env.STEAM_KEY, input)
 
   } else {
-    return Promise.resolve(trimmedInput);
+    return Promise.resolve(input);
   }
+}
+
+exports.trimUserInput = function(input) {
+  return input
+  .replace(/\\/g, '')
+  .replace(/\//g, '')
+  .trim();
 }
 
 exports.checkFileExists = function(filePath) {
