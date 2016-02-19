@@ -45,6 +45,32 @@ exports.game = function(gameID, dataToReturn) {
   }
 }
 
+exports.recentGameLogos = function(steamid, count, logo) {
+  count = count || 2;
+  logo = logo || true;
+  var URI = profile.buildURI(process.env.STEAM_KEY, "IPlayerService/GetRecentlyPlayedGames/v0001", steamid);
+  URI += "&count=" + count;
+  
+  profile.callSteamAPI(URI)
+  .then(function(recentGames) {
+    recentGames = recentGames.response.games;
+
+    if (recentGames.length === 0) {
+      return false;
+    }
+
+    var gameLogos = [];
+
+    for (var i = 0; i < recentGames.length; i++) {
+      gameLogos[i] = "http://media.steampowered.com/steamcommunity/public" +
+        "/images/apps/" + recentGames[i].appid + '/' + recentGames[i].img_logo_url +
+        ".jpg";
+    }
+
+    return gameLogos;
+  })
+}
+
 function getMonthName(month) {
   var months = [
     "January", 
