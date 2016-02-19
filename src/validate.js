@@ -4,7 +4,7 @@ var request = require('request');
 var Promise = require('bluebird');
 var fs      = require('fs');
 
-var SteamSigErrors = require('./error');
+var SteamSigError = require('./error');
 
 exports.steamid = function(input) { 
   if (input.substr(0,7) !== "7656119"
@@ -29,7 +29,7 @@ exports.checkFileExists = function(filePath) {
   return new Promise(function(resolve, reject) {
     fs.stat(filePath, function(err, stats) {
       if (!stats) {
-        reject(new SteamSigErrors.FileDNE(filePath));
+        reject(new SteamSigError.FileDNE(filePath));
       } else {
         resolve(filePath);
       }

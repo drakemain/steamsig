@@ -9,7 +9,7 @@ var bparse   = require('body-parser');
 var path     = require('path');
 
 var profile        = require('./src/profile');
-var SteamSigErrors = require('./src/error');
+var SteamSigError = require('./src/error');
 var init = require('./src/initialize');
 var checkFileExists = require('./src/validate').checkFileExists;
 var trimUserInput = require('./src/validate').trimUserInput;
@@ -49,11 +49,11 @@ app.get('/profile/:user', function(req, res) {
     res.status(200).sendFile(path.resolve(profileImg));
   })
 
-  .catch(SteamSigErrors.Validation, function(err) {
+  .catch(SteamSigError.Validation, function(err) {
     console.error(err.message);
     res.status(400).send("The name or ID doesn't seem to be associated with a Steam account.");
   })
-  .catch(SteamSigErrors.TimeOut, function(err) {
+  .catch(SteamSigError.TimeOut, function(err) {
     console.error(err.message);
     res.status(504);
 
@@ -66,7 +66,7 @@ app.get('/profile/:user', function(req, res) {
       res.sendFile(path.resolve(filePath));
     })  
   })
-  .catch(SteamSigErrors.FileDNE, function(err) {
+  .catch(SteamSigError.FileDNE, function(err) {
     console.error(err.message);
     res.send("Your profile is not cached and Steam is not responding to requests!")
   })
