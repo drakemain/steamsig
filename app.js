@@ -12,6 +12,7 @@ var profile        = require('./src/profile');
 var SteamSigErrors = require('./src/error');
 var init = require('./src/initialize');
 var checkFileExists = require('./src/validate').checkFileExists;
+var trimUserInput = require('./src/validate').trimUserInput;
 
 var app = express();
 app.use(bparse.json());
@@ -36,7 +37,8 @@ app.get('/steamIDForm', function(req, res) {
 
 //will be more uselfull later...
 app.get('/form-handler', function(req, res) {
-  res.redirect('/profile/' + req.query.steamid);
+  var trimmedInput = trimUserInput(req.query.steamid);
+  res.redirect('/profile/' + trimmedInput);
 });
 
 app.get('/profile/:user', function(req, res) {
