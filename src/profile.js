@@ -33,14 +33,14 @@ exports.render = function(uInput) {
   .then(function(userData) {
     return Promise.join(
       parseGame(userData.gameid, 'gameName'),
-      recentGameLogos(userData.steamid),
+      //recentGameLogos(userData.steamid),
       getUserDirectory(userData.steamid),
 
-      function(game, recentGameLogos, userDir) {
+      function(game, /*recentGameLogos,*/ userDir) {
         userData.lastAPICall = new Date();
         userData.currentGame = game;
         userData.userDirectory = userDir;
-        userData.recentGameLogos = recentGameLogos;
+        //userData.recentGameLogos = recentGameLogos;
         userData.sigPath = path.join(userDir, "sig.png");
       }
     )
