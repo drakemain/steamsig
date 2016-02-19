@@ -9,6 +9,7 @@ var validate = require('./validate');
 var SteamSigError = require('./error');
 var imgProcess = require('./image');
 var parseGame = require('./parser').game;
+var recentGameLogos = require('./parser').recentGameLogos;
 
 exports.cacheUserData = cacheUserData;
 exports.getCachedData = getCachedData;
@@ -32,13 +33,15 @@ exports.render = function(uInput) {
   .then(function(userData) {
     return Promise.join(
       parseGame(userData.gameid, 'gameName'),
+      recentGameLogos(userData.steamid),
       getUserDirectory(userData.steamid),
 
-      function(game, userDir) {
+      function(game, recentGameLogos, userDir) {
         userData.lastAPICall = new Date();
-        userData.userDirectory = userDir;
-        userData.sigPath = path.join(userDir, "sig.png");
         userData.currentGame = game;
+        userData.userDirectory = userDir;
+        userData.recentGameLogos = recentGameLogos;
+        userData.sigPath = path.join(userDir, "sig.png");
       }
     )
 
@@ -75,9 +78,11 @@ function buildURI(APIkey, method, ID) {
 
     if (method === "ISteamUser/GetPlayerSummaries/v0002") {
       URI += "&steamids=";
+    } else if (method === "IPlayerService/GetRecentlyPlayedGames/v0001") {
+      URI += "&steamid=";
     } else if (method === "ISteamUserStats/GetSchemaForGame/v2") {
       URI += "&appid=";
-    }
+    } 
 
   URI += ID;
 
