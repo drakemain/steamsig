@@ -19,10 +19,14 @@ exports.steamid = function(input) {
 }
 
 exports.trimUserInput = function(input) {
-  return input
-  .replace(/\\/g, '')
-  .replace(/\//g, '')
-  .trim();
+  if (input) {
+    return input
+    .replace(/\\/g, '')
+    .replace(/\//g, '')
+    .trim();
+  } else {
+    return '';
+  }
 }
 
 exports.checkFileExists = function(filePath) {
