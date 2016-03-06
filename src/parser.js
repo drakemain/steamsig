@@ -27,6 +27,7 @@ exports.timecreated = function(time) {
   return {dateCreated: dateString, age: age};
 }
 
+//returns information about a game given a game id
 exports.game = function(gameID, dataToReturn) {
   var URI = profile.buildURI(process.env.STEAM_KEY, "ISteamUserStats/GetSchemaForGame/v2", gameID);
 
@@ -45,6 +46,7 @@ exports.game = function(gameID, dataToReturn) {
   }
 }
 
+//gets urls for imgs from recently played games list
 exports.recentGameLogos = function(steamid, count, logo) {
   count = count || 2;
   logo = logo || true;

@@ -19,7 +19,9 @@ exports.buildURI = buildURI;
 
 exports.render = function(uInput) {
   return validate.steamid(uInput)
-  .tap(function() {console.time("API");})
+
+  .tap(function() {console.time("|__API");})
+  //get JSON data from Steam API with Steam ID
   .then(function(steamid) {
     var URI = buildURI(process.env.STEAM_KEY, "ISteamUser/GetPlayerSummaries/v0002", steamid);
     return callSteamAPI(URI)
@@ -28,14 +30,16 @@ exports.render = function(uInput) {
       return responseData.response.players[0];
     });
   })
-  .tap(function() {console.timeEnd("API");})
+  .tap(function() {console.timeEnd("|__API");})
 
   .then(function(userData) {
     return Promise.join(
+      //gather some additional information to append to JSON object
       parseGame(userData.gameid, 'gameName'),
       //recentGameLogos(userData.steamid),
       getUserDirectory(userData.steamid),
 
+      //append additional information to JSON object
       function(game, /*recentGameLogos,*/ userDir) {
         userData.lastAPICall = new Date();
         userData.currentGame = game;
@@ -45,6 +49,7 @@ exports.render = function(uInput) {
       }
     )
 
+    //cache data and render profile image
     .then(function() {
       cacheUserData(userData);
       return imgProcess(userData);
@@ -53,7 +58,6 @@ exports.render = function(uInput) {
 }
 
 function callSteamAPI(uri) {
-
   return new Promise(function(resolve, reject) {
     request({uri: uri, timeout:1000}, function(err, res, body) {
       if (!err) {
@@ -90,7 +94,6 @@ function buildURI(APIkey, method, ID) {
 }
 
 function cacheUserData(userData) {
-
   return new Promise(function(resolve, reject) {
     var filePath = path.join(userData.userDirectory, 'userData.JSON');
     var userDataString = JSON.stringify(userData);

@@ -3,6 +3,7 @@
 var util = require('util');
 var exports = module.exports;
 
+//unable to validate user input as steam id
 function Validation() {
   Error.captureStackTrace(this, this.constructor);
   this.message = "Could not validate vanity name.";
@@ -12,6 +13,7 @@ util.inherits(Validation, Error);
 
 exports.Validation = Validation;
 
+//steam api not responding
 function TimeOut(uri) {
   Error.captureStackTrace(this, this.constructor);
   this.uri = uri;

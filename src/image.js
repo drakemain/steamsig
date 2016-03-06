@@ -6,7 +6,7 @@ var path  = require('path'),
     parseSteam = require('./parser')
 
 module.exports = function (userInfo) {
-  console.time("imgProcess");
+  console.time("|__imgProcess");
   var filePath = path.join(userInfo.userDirectory, 'sig.png');
 
   return composite(path.join('assets', 'img', 'base-gray.png'), 
@@ -47,7 +47,7 @@ module.exports = function (userInfo) {
       }
       img
       .write(filePath, function(err) {
-        console.timeEnd("imgProcess");
+        console.timeEnd("|__imgProcess");
         if (!err) {resolve(filePath);}
         else {reject(err);}
       });

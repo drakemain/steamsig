@@ -5,7 +5,6 @@ var fs       = Promise.promisifyAll(require('fs'));
 var readline = require('readline');
 var path     = require('path');
 
-
 module.exports = function(){
   return checkDirExists(path.join('assets', 'profiles'))
   .then(checkDirExists('config'))
@@ -15,6 +14,7 @@ module.exports = function(){
   });
 }
 
+//ensures STEAM_KEY has been set, otherwise prompts for STEAM_KEY
 var steamKeyCheck = function() {
   if (!process.env.STEAM_KEY) {
     return makeSteamKey()
@@ -25,6 +25,7 @@ var steamKeyCheck = function() {
   }
 }
 
+//Prompts user for STEAM_KEY to use for this session
 var makeSteamKey = function() {
   var rl = readline.createInterface({
     input: process.stdin,
@@ -51,5 +52,5 @@ var makeSteamKey = function() {
 var checkDirExists = function(dir) {
   return fs.statAsync(dir).catch(function() {
     fs.mkdir(dir);
-  })
+  });
 }

@@ -6,6 +6,7 @@ var fs      = require('fs');
 
 var SteamSigError = require('./error');
 
+//checks if input is valid Steam ID, otherwise attempts to check for custom name
 exports.steamid = function(input) { 
   if (input.substr(0,7) !== "7656119"
     || input.length !== 17
@@ -18,6 +19,7 @@ exports.steamid = function(input) {
   }
 }
 
+//removes slashes and spaces from input
 exports.trimUserInput = function(input) {
   if (input) {
     return input
@@ -38,12 +40,11 @@ exports.checkFileExists = function(filePath) {
         resolve(filePath);
       }
     });
-  
   })
 }
 
+//attemps to get valid Steam ID from a custom name
 function resolveVanityName(key, name) {
-  
   var apiRequest = "http://api.steampowered.com/ISteamUser"
     + "/ResolveVanityURL/v0001/?key=" + key + "&vanityurl="
     + name;
