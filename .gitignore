@@ -7,3 +7,5 @@ assets/profiles/
 config/key.txt
 config/.env
 .eslintrc
+steamsig.sublime-project
+steamsig.sublime-workspace
