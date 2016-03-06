@@ -20,6 +20,11 @@ app.use(bparse.urlencoded({ extended: true }));
 app.engine('handlebars', hbars({defaultLayout: 'main'}));
 app.set('view engine', 'handlebars');
 
+init();
+process.env.PORT = process.env.PORT || 3000;
+app.listen(process.env.PORT);
+console.log("--App started listening on port", process.env.PORT + '.');
+
 app.get('/', function(req, res) {
   if (process.env.STEAM_KEY) {
     res.redirect('/steamIDForm');
@@ -78,8 +83,5 @@ app.get('/profile/:user', function(req, res) {
   });
 });
 
-init();
 
-process.env.PORT = process.env.PORT || 3000;
-app.listen(process.env.PORT);
-console.log("--App started listening on port", process.env.PORT);
+
