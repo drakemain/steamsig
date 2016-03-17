@@ -102,9 +102,12 @@ function getAge(dateCreated) {
       months += 12;
   }
 
-  var age = years.toString() + '.' + 
-    Math.floor((months - today.getMonth()) * 10000 / 12).toString().substr(0, 1) + 
-    " years";
+  var age = years.toString();
+  if (months !== 0) {
+    age += '.' + 
+    Math.floor((months - today.getMonth()) * 10000 / 12).toString().substr(0, 1);
+  }
+  age += " years";
 
   return age;
 }
