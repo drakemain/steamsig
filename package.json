@@ -1,6 +1,6 @@
 {
   "name": "steamsig",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "uses steam api to generate a customaizable steam profile image",
   "dependencies": {
     "bluebird": "^3.0.5",
