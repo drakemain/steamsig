@@ -62,10 +62,12 @@ exports.recentGameLogos = function(steamid, count, type) {
   
   return profile.callSteamAPI(URI)
   .then(function(recentGames) {
-    recentGames = recentGames.response.games;
+    recentGames = recentGames.response;
 
-    if (recentGames.length === 0) {
+    if (!recentGames.total_count || recentGames.total_count === 0 || recentGames.total_count === 1) {
       return false;
+    } else {
+      recentGames = recentGames.games;
     }
 
     var gameLogos = [];
