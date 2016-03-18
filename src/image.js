@@ -5,15 +5,16 @@ var path  = require('path'),
     Promise = require('bluebird'),
     parseSteam = require('./parser');
 
-var img;
+var img, tempFile;
+
+//TODO: VERY MESSY!! Refactor!
 
 module.exports = function (userInfo) {
   console.time("|>imgProcess");
-  var filePath = path.join(userInfo.userDirectory, 'sig.png');
-  var tempFile = path.join(userInfo.userDirectory, 'temp.png');
+  tempFile = path.join(userInfo.userDirectory, 'temp.png');
 
   return compositeToBuffer(path.join('assets', 'img', 'base-gray.png'), 
-    userInfo.avatarfull.replace('https', 'http'))
+    userInfo.avatarfull.replace('https', 'http'), "+8+8")
 
   .then(function(buffer) {
     return new Promise(function(resolve, reject) {
@@ -26,9 +27,7 @@ module.exports = function (userInfo) {
       .font("Arial").fontSize(20).drawText(208, 32, userInfo.personaname);
 
       if (userInfo.communityvisibilitystate !== 3) {
-        compositeToFile(filePath, path.join('assets', 'img', 'confidential.png'))
-        .tap(console.timeEnd("|>imgProcess"))
-
+        compositeToFile(userInfo.sigPath, path.join('assets', 'img', 'confidential.png'))
         .then(resolve);
 
       } else {
@@ -42,26 +41,39 @@ module.exports = function (userInfo) {
           img.drawText(216, 53, parseSteam.personastate(userInfo.personastate));
         }
 
-        /*img.drawLine(447, 17, 482, 17)
-        .drawLine(447, 17, 447, 52)
-        .drawLine(482, 52, 447, 52)
-        .drawLine(482, 52, 482, 17)*/
+        img.drawText(410, 32, parseSteam.timecreated(userInfo.timecreated).age);
 
-        img.drawText(410, 32, parseSteam.timecreated(userInfo.timecreated).age)
-        .write(filePath, function(err) {
-          console.timeEnd("|>imgProcess");
-          if (!err) {resolve(filePath);}
-          else {reject(err);}
-        });
+        if (userInfo.recentGameLogos) {
+          resize(userInfo.recentGameLogos[0], 133).then(function(resizedLogo) {
+            return compositeToFile(userInfo.sigPath, resizedLogo, "+209+133");
+          }).then(function(newImg) {
+            img = gm(newImg);
+            return Promise.resolve();
+          }).then(function() {
+            return resize(userInfo.recentGameLogos[1], 133)
+          }).then(function(resizedLogo) {
+            resolve(compositeToFile(userInfo.sigPath, resizedLogo, "+350+133"));
+          })
+
+        } else {
+          img.write(userInfo.sigPath, function(err) {
+            if (!err) {resolve(userInfo.sigPath);}
+            else {reject(err);}
+          })
+        }
+
+        
       }
     });
   });
 };
 
-function compositeToBuffer(bottomLayer, topLayer) {
+function compositeToBuffer(bottomLayer, topLayer, offset) {
+  offset = offset || "+0+0";
+
   return new Promise(function(resolve, reject) {
     gm().command("composite")
-    .in("-geometry", "+8+8")
+    .in("-geometry", offset)
     .in(topLayer)
     .in(bottomLayer)
     .toBuffer('PNG', function(err, buffer) {
@@ -71,17 +83,28 @@ function compositeToBuffer(bottomLayer, topLayer) {
   });
 }
 
-function compositeToFile(path, topLayer) {
+function compositeToFile(path, topLayer, offset) {
+  offset = offset || "+0+0";
+
   return new Promise(function(resolve, reject) {
     img.write(path, function(err) {
       gm()
       .command('composite')
+      .in("-geometry", offset)
       .in(topLayer)
       .in(path)
       .write(path, function(err) {
         if (!err) {resolve(path);}
         else {reject(err);}
       });
+    });
+  });
+}
+
+function resize(img, width) {
+  return new Promise(function(resolve) {
+    gm(img).resize(width).write(tempFile, function(err) {
+      resolve(tempFile);
     });
   });
 }
