@@ -1,6 +1,7 @@
 "use strict";
 
 var profile = require('./profile');
+var Promise = require('bluebird');
 
 exports.personastate = function(state) {
   var states = [
@@ -47,13 +48,19 @@ exports.game = function(gameID, dataToReturn) {
 }
 
 //gets urls for imgs from recently played games list
-exports.recentGameLogos = function(steamid, count, logo) {
+exports.recentGameLogos = function(steamid, count, type) {
   count = count || 2;
-  logo = logo || true;
+  type = type || "logo"; //get logo or smaller icon
   var URI = profile.buildURI(process.env.STEAM_KEY, "IPlayerService/GetRecentlyPlayedGames/v0001", steamid);
   URI += "&count=" + count;
+
+  if (type === "logo") {
+    type = "img_logo_url";
+  } else {
+    type = "img_icon_url";
+  }
   
-  profile.callSteamAPI(URI)
+  return profile.callSteamAPI(URI)
   .then(function(recentGames) {
     recentGames = recentGames.response.games;
 
@@ -65,12 +72,12 @@ exports.recentGameLogos = function(steamid, count, logo) {
 
     for (var i = 0; i < recentGames.length; i++) {
       gameLogos[i] = "http://media.steampowered.com/steamcommunity/public" +
-        "/images/apps/" + recentGames[i].appid + '/' + recentGames[i].img_logo_url +
+        "/images/apps/" + recentGames[i].appid + '/' + recentGames[i][type] +
         ".jpg";
     }
 
-    return gameLogos;
-  })
+    return Promise.resolve(gameLogos);
+  });
 }
 
 function getMonthName(month) {
