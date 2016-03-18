@@ -20,7 +20,7 @@ exports.buildURI = buildURI;
 exports.render = function(uInput) {
   return validate.steamid(uInput)
 
-  .tap(function() {console.time("|__API");})
+  .tap(function() {console.time("|>API");})
   //get JSON data from Steam API with Steam ID
   .then(function(steamid) {
     var URI = buildURI(process.env.STEAM_KEY, "ISteamUser/GetPlayerSummaries/v0002", steamid);
@@ -30,21 +30,21 @@ exports.render = function(uInput) {
       return responseData.response.players[0];
     });
   })
-  .tap(function() {console.timeEnd("|__API");})
+  .tap(function() {console.timeEnd("|>API");})
 
   .then(function(userData) {
     return Promise.join(
       //gather some additional information to append to JSON object
       parseGame(userData.gameid, 'gameName'),
-      //recentGameLogos(userData.steamid),
+      recentGameLogos(userData.steamid),
       getUserDirectory(userData.steamid),
 
       //append additional information to JSON object
-      function(game, /*recentGameLogos,*/ userDir) {
+      function(game, recentGameLogos, userDir) {
         userData.lastAPICall = new Date();
         userData.currentGame = game;
+        userData.recentGameLogos = recentGameLogos;
         userData.userDirectory = userDir;
-        //userData.recentGameLogos = recentGameLogos;
         userData.sigPath = path.join(userDir, "sig.png");
       }
     )
