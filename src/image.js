@@ -24,7 +24,9 @@ module.exports = function (userInfo) {
       .drawLine(491, 191, 200, 191)
       .drawLine(491, 191, 491, 8)
 
-      .font("Arial").fontSize(20).drawText(208, 32, userInfo.personaname);
+      .font("Arial").fontSize(20).drawText(208, 32, userInfo.personaname)
+
+      .fontSize(8).drawText(8,198, "steamsig.drakemain.com V0.7.0a");
 
       if (userInfo.communityvisibilitystate !== 3) {
         compositeToFile(userInfo.sigPath, path.join('assets', 'img', 'confidential.png'))
@@ -41,7 +43,7 @@ module.exports = function (userInfo) {
           img.drawText(216, 53, parseSteam.personastate(userInfo.personastate));
         }
 
-        img.drawText(410, 32, parseSteam.timecreated(userInfo.timecreated).age);
+        img.drawText(375, 32, "User for " + parseSteam.timecreated(userInfo.timecreated).age);
 
         if (userInfo.recentGameLogos) {
           resize(userInfo.recentGameLogos[0], 133).then(function(resizedLogo) {
@@ -53,7 +55,7 @@ module.exports = function (userInfo) {
             return resize(userInfo.recentGameLogos[1], 133)
           }).then(function(resizedLogo) {
             resolve(compositeToFile(userInfo.sigPath, resizedLogo, "+350+133"));
-          })
+          });
 
         } else {
           img.write(userInfo.sigPath, function(err) {
