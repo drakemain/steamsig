@@ -26,7 +26,7 @@ module.exports = function (userInfo) {
 
       .font("Arial").fontSize(20).drawText(208, 32, userInfo.personaname)
 
-      .fontSize(8).drawText(8,198, "steamsig.drakemain.com V0.7.0a");
+      .fontSize(8).drawText(8,198, "steamsig.drakemain.com V0.7.1a");
 
       if (userInfo.communityvisibilitystate !== 3) {
         compositeToFile(userInfo.sigPath, path.join('assets', 'img', 'confidential.png'))
@@ -43,7 +43,7 @@ module.exports = function (userInfo) {
           img.drawText(216, 53, parseSteam.personastate(userInfo.personastate));
         }
 
-        img.drawText(375, 32, "User for " + parseSteam.timecreated(userInfo.timecreated).age);
+        img.drawText(415, 32, "User for \n" + parseSteam.timecreated(userInfo.timecreated).age);
 
         if (userInfo.recentGameLogos) {
           resize(userInfo.recentGameLogos[0], 133).then(function(resizedLogo) {
