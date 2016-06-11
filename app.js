@@ -48,7 +48,7 @@ app.get('/profile/:user', function(req, res) {
 
   profile.render(req.params.user)
   .then(function(profileImg) {
-    res.status(200).sendFile(profileImg);
+    res.status(200).sendFile(path.resolve(profileImg));
   })
 
   .catch(SteamSigError.Validation, function(err) {
