@@ -50,13 +50,10 @@ function resolveVanityName(name) {
   return steam.call(apiRequest)
 
   .then(function(resolvedRequest) {
-
-    console.log(resolvedRequest);
     if (resolvedRequest.response.steamid) {
       return Promise.resolve(resolvedRequest.response.steamid);
     } else {
-      console.log(resolvedRequest.response.message);
       return Promise.reject(new SteamSigError.Validation);
     }
   });
-}
+} exports.resolveVanityName = resolveVanityName;
