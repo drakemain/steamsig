@@ -1,7 +1,7 @@
-var request = require('request');
 var Promise = require('bluebird');
 var fs      = require('fs');
 
+var steam         = require('./steam');
 var SteamSigError = require('./error');
 
 //checks if input is valid Steam ID, otherwise attempts to check for custom name
@@ -10,7 +10,7 @@ exports.steamid = function(input) {
     || input.length !== 17
     || isNaN(input.substr(8,16))) {
 
-    return resolveVanityName(process.env.STEAM_KEY, input);
+    return resolveVanityName(input);
 
   } else {
     return Promise.resolve(input);
@@ -42,32 +42,21 @@ exports.checkFileExists = function(filePath) {
 };
 
 //attemps to get valid Steam ID from a custom name
-function resolveVanityName(key, name) {
-  var apiRequest = "http://api.steampowered.com/ISteamUser"
-    + "/ResolveVanityURL/v0001/?key=" + key + "&vanityurl="
-    + name;
+function resolveVanityName(name) {
+  var apiRequest = steam.buildRequest(process.env.STEAM_KEY
+    , "ISteamUser/ResolveVanityURL/v0001"
+    , name);
 
-  return new Promise(function(resolve, reject) {
+  return steam.call(apiRequest)
 
-    request({uri:apiRequest, timeout:6000}, function(err, res, body) {
-      if (!err) {
-        var response = JSON.parse(body).response;
+  .then(function(resolvedRequest) {
 
-        if (response.steamid) {
-          resolve(response.steamid);
-        } else {
-          reject(new SteamSigError.Validation());
-        }
-      }
-    })
-
-    .on('error', function(err) {
-
-      if (err.code === "ETIMEDOUT") {
-        reject(new SteamSigError.TimeOut());
-      } else {
-        reject(err);
-      }
-    });
+    console.log(resolvedRequest);
+    if (resolvedRequest.response.steamid) {
+      return Promise.resolve(resolvedRequest.response.steamid);
+    } else {
+      console.log(resolvedRequest.response.message);
+      return Promise.reject(new SteamSigError.Validation);
+    }
   });
 }

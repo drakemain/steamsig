@@ -32,7 +32,9 @@ exports.buildRequest = function(APIkey, method, ID) {
     URI += "&steamid=";
   } else if (method === "ISteamUserStats/GetSchemaForGame/v2") {
     URI += "&appid=";
-  } 
+  } else if (method === "ISteamUser/ResolveVanityURL/v0001") {
+    URI += "&vanityurl=";
+  }
 
   URI += ID;
 
