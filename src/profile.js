@@ -1,5 +1,3 @@
-"use strict";
-
 var Promise  = require('bluebird');
 var request  = require('request');
 var path     = require('path');
@@ -55,7 +53,7 @@ exports.render = function(uInput) {
       return imgProcess(userData);
     });
   });
-}
+};
 
 function callSteamAPI(uri) {
   return new Promise(function(resolve, reject) {
@@ -80,13 +78,13 @@ function buildURI(APIkey, method, ID) {
   var URI = "https://api.steampowered.com/"
     + method + "/?key=" + APIkey;
 
-    if (method === "ISteamUser/GetPlayerSummaries/v0002") {
-      URI += "&steamids=";
-    } else if (method === "IPlayerService/GetRecentlyPlayedGames/v0001") {
-      URI += "&steamid=";
-    } else if (method === "ISteamUserStats/GetSchemaForGame/v2") {
-      URI += "&appid=";
-    } 
+  if (method === "ISteamUser/GetPlayerSummaries/v0002") {
+    URI += "&steamids=";
+  } else if (method === "IPlayerService/GetRecentlyPlayedGames/v0001") {
+    URI += "&steamid=";
+  } else if (method === "ISteamUserStats/GetSchemaForGame/v2") {
+    URI += "&appid=";
+  } 
 
   URI += ID;
 
@@ -104,7 +102,7 @@ function cacheUserData(userData) {
       } else {
         resolve(userData);
       }
-    })
+    });
   });
 }
 

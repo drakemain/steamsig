@@ -1,5 +1,3 @@
-"use strict";
-
 var request = require('request');
 var Promise = require('bluebird');
 var fs      = require('fs');
@@ -12,12 +10,12 @@ exports.steamid = function(input) {
     || input.length !== 17
     || isNaN(input.substr(8,16))) {
 
-    return resolveVanityName(process.env.STEAM_KEY, input)
+    return resolveVanityName(process.env.STEAM_KEY, input);
 
   } else {
     return Promise.resolve(input);
   }
-}
+};
 
 //removes slashes and spaces from input
 exports.trimUserInput = function(input) {
@@ -29,7 +27,7 @@ exports.trimUserInput = function(input) {
   } else {
     return '';
   }
-}
+};
 
 exports.checkFileExists = function(filePath) {
   return new Promise(function(resolve, reject) {
@@ -40,8 +38,8 @@ exports.checkFileExists = function(filePath) {
         resolve(filePath);
       }
     });
-  })
-}
+  });
+};
 
 //attemps to get valid Steam ID from a custom name
 function resolveVanityName(key, name) {

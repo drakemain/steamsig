@@ -1,5 +1,3 @@
-"use strict";
-
 var profile = require('./profile');
 var Promise = require('bluebird');
 
@@ -11,22 +9,22 @@ exports.personastate = function(state) {
     "Away",
     "Snooze",
     "Looking to trade"
-    ];
+  ];
   
   return states[state];
-}
+};
 
 exports.timecreated = function(time) {
   var dateCreated = new Date(time * 1000);
 
-  var year = dateCreated.getFullYear(),
-      month = dateCreated.getMonth();
+  var year = dateCreated.getFullYear()
+  , month = dateCreated.getMonth();
 
   var age = getAge(dateCreated);
 
   var dateString = getMonthName(month) + " " + year;
   return {dateCreated: dateString, age: age};
-}
+};
 
 //returns information about a game given a game id
 exports.game = function(gameID, dataToReturn) {
@@ -45,7 +43,7 @@ exports.game = function(gameID, dataToReturn) {
   } else {
     return false;
   }
-}
+};
 
 //gets urls for imgs from recently played games list
 exports.recentGameLogos = function(steamid, count, type) {
@@ -80,7 +78,7 @@ exports.recentGameLogos = function(steamid, count, type) {
 
     return Promise.resolve(gameLogos);
   });
-}
+};
 
 function getMonthName(month) {
   var months = [
@@ -107,8 +105,8 @@ function getAge(dateCreated) {
   var months = today.getMonth() - dateCreated.getMonth();
   
   if (months < 0 || (months === 0 && today.getDate() < dateCreated.getDate())) {
-      years--;
-      months += 12;
+    years--;
+    months += 12;
   }
 
   var age = years.toString();

@@ -1,5 +1,3 @@
-"use strict";
-
 var Promise  = require('bluebird');
 var fs       = Promise.promisifyAll(require('fs'));
 var readline = require('readline');
@@ -10,9 +8,9 @@ module.exports = function(){
   .then(checkDirExists('config'))
   .then(steamKeyCheck)
   .then(function() {
-    console.log("Ready.\n")
+    console.log("Ready.\n");
   });
-}
+};
 
 //ensures STEAM_KEY has been set, otherwise prompts for STEAM_KEY
 var steamKeyCheck = function() {
@@ -23,7 +21,7 @@ var steamKeyCheck = function() {
       console.log("Your key has been set for this session.");
     });
   }
-}
+};
 
 //Prompts user for STEAM_KEY to use for this session
 var makeSteamKey = function() {
@@ -47,10 +45,10 @@ var makeSteamKey = function() {
       resolve(data);
     });
   });
-}
+};
 
 var checkDirExists = function(dir) {
   return fs.statAsync(dir).catch(function() {
     fs.mkdir(dir);
   });
-}
+};

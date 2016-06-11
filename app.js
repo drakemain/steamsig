@@ -1,12 +1,9 @@
-"use strict";
-
-require('dotenv').config({path: './config/.env', silent: true})
+require('dotenv').config({path: './config/.env', silent: true});
 
 var path     = require('path');
 var express  = require('express');
 var hbars    = require('express-handlebars');
 var bparse   = require('body-parser');
-var path     = require('path');
 
 var profile        = require('./src/profile');
 var SteamSigError = require('./src/error');
@@ -36,8 +33,8 @@ app.get('/', function(req, res) {
 
 app.get('/steamIDForm', function(req, res) {
   res.render('form', {
-    title: "Enter Steam ID",
-  })
+    title: "Enter Steam ID"
+  });
 });
 
 //will be more uselfull later...
@@ -51,7 +48,7 @@ app.get('/profile/:user', function(req, res) {
 
   profile.render(req.params.user)
   .then(function(profileImg) {
-    res.status(200).sendFile(path.resolve(profileImg));
+    res.status(200).sendFile(profileImg);
   })
 
   .catch(SteamSigError.Validation, function(err) {
@@ -69,17 +66,17 @@ app.get('/profile/:user', function(req, res) {
     .then(function(filePath) {
       console.log('Cached profile sent');
       res.sendFile(path.resolve(filePath));
-    })  
+    });
   })
   .catch(SteamSigError.FileDNE, function(err) {
     console.error(err.message);
-    res.send("Your profile is not cached and Steam is not responding to requests!")
+    res.send("Your profile is not cached and Steam is not responding to requests!");
   })
   .catch(function(err) {
     console.error("An unhandled error occured.");
     console.trace(err.stack);
     
-    res.status(500).send("ARG! You've destroyed everything!")
+    res.status(500).send("ARG! You've destroyed everything!");
   });
 });
 

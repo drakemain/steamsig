@@ -1,9 +1,7 @@
-"use strict";
-
-var path  = require('path'),
-    gm    = require('gm'),
-    Promise = require('bluebird'),
-    parseSteam = require('./parser');
+var path  = require('path')
+, gm    = require('gm')
+, Promise = require('bluebird')
+, parseSteam = require('./parser');
 
 var img, tempFile;
 
@@ -33,7 +31,7 @@ module.exports = function (userInfo) {
         .then(resolve);
 
       } else {
-        img.fontSize(14)
+        img.fontSize(14);
 
         if (userInfo.gameid) {
           var gameStatus = "In-Game";
@@ -52,7 +50,7 @@ module.exports = function (userInfo) {
             img = gm(newImg);
             return Promise.resolve();
           }).then(function() {
-            return resize(userInfo.recentGameLogos[1], 133)
+            return resize(userInfo.recentGameLogos[1], 133);
           }).then(function(resizedLogo) {
             resolve(compositeToFile(userInfo.sigPath, resizedLogo, "+350+133"));
           });
@@ -61,7 +59,7 @@ module.exports = function (userInfo) {
           img.write(userInfo.sigPath, function(err) {
             if (!err) {resolve(userInfo.sigPath);}
             else {reject(err);}
-          })
+          });
         }
 
         
@@ -81,7 +79,7 @@ function compositeToBuffer(bottomLayer, topLayer, offset) {
     .toBuffer('PNG', function(err, buffer) {
       if (!err) {resolve(buffer);}
       else {reject(err);}
-    })
+    });
   });
 }
 
@@ -89,7 +87,7 @@ function compositeToFile(path, topLayer, offset) {
   offset = offset || "+0+0";
 
   return new Promise(function(resolve, reject) {
-    img.write(path, function(err) {
+    img.write(path, function() {
       gm()
       .command('composite')
       .in("-geometry", offset)
@@ -105,7 +103,7 @@ function compositeToFile(path, topLayer, offset) {
 
 function resize(img, width) {
   return new Promise(function(resolve) {
-    gm(img).resize(width).write(tempFile, function(err) {
+    gm(img).resize(width).write(tempFile, function() {
       resolve(tempFile);
     });
   });
