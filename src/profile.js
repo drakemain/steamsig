@@ -1,19 +1,16 @@
 var Promise  = require('bluebird');
-var request  = require('request');
 var path     = require('path');
 var fs       = Promise.promisifyAll(require("fs"));
 
 var validate = require('./validate');
-var SteamSigError = require('./error');
 var imgProcess = require('./image');
 var parseGame = require('./parser').game;
 var recentGameLogos = require('./parser').recentGameLogos;
+var steam = require('./steam');
 
 exports.cacheUserData = cacheUserData;
 exports.getCachedData = getCachedData;
 exports.getUserDirectory = getUserDirectory;
-exports.callSteamAPI = callSteamAPI;
-exports.buildURI = buildURI;
 
 exports.render = function(uInput) {
   return validate.steamid(uInput)
@@ -21,8 +18,8 @@ exports.render = function(uInput) {
   .tap(function() {console.time("|>API");})
   //get JSON data from Steam API with Steam ID
   .then(function(steamid) {
-    var URI = buildURI(process.env.STEAM_KEY, "ISteamUser/GetPlayerSummaries/v0002", steamid);
-    return callSteamAPI(URI)
+    var URI = steam.buildRequest(process.env.STEAM_KEY, "ISteamUser/GetPlayerSummaries/v0002", steamid);
+    return steam.call(URI)
 
     .then(function(responseData) {
       return responseData.response.players[0];
@@ -54,42 +51,6 @@ exports.render = function(uInput) {
     });
   });
 };
-
-function callSteamAPI(uri) {
-  return new Promise(function(resolve, reject) {
-    request({uri: uri, timeout:1000}, function(err, res, body) {
-      if (!err) {
-        var userData = JSON.parse(body);
-
-        resolve(userData);
-      }
-    })
-    .on('error', function(err) {
-      if (err.code === "ETIMEDOUT") {
-        reject(new SteamSigError.TimeOut(uri));
-      } else {
-        reject(err);
-      }
-    });
-  });
-}
-
-function buildURI(APIkey, method, ID) {
-  var URI = "https://api.steampowered.com/"
-    + method + "/?key=" + APIkey;
-
-  if (method === "ISteamUser/GetPlayerSummaries/v0002") {
-    URI += "&steamids=";
-  } else if (method === "IPlayerService/GetRecentlyPlayedGames/v0001") {
-    URI += "&steamid=";
-  } else if (method === "ISteamUserStats/GetSchemaForGame/v2") {
-    URI += "&appid=";
-  } 
-
-  URI += ID;
-
-  return URI;
-}
 
 function cacheUserData(userData) {
   return new Promise(function(resolve, reject) {

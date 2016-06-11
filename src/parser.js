@@ -1,5 +1,6 @@
-var profile = require('./profile');
 var Promise = require('bluebird');
+
+var steam = require('./steam');
 
 exports.personastate = function(state) {
   var states = [
@@ -28,10 +29,10 @@ exports.timecreated = function(time) {
 
 //returns information about a game given a game id
 exports.game = function(gameID, dataToReturn) {
-  var URI = profile.buildURI(process.env.STEAM_KEY, "ISteamUserStats/GetSchemaForGame/v2", gameID);
+  var URI = steam.buildRequest(process.env.STEAM_KEY, "ISteamUserStats/GetSchemaForGame/v2", gameID);
 
   if (gameID) {
-    return profile.callSteamAPI(URI)
+    return steam.call(URI)
     .then(function(gameSchema) {
       if (dataToReturn) {
         return gameSchema.game[dataToReturn];
@@ -49,7 +50,7 @@ exports.game = function(gameID, dataToReturn) {
 exports.recentGameLogos = function(steamid, count, type) {
   count = count || 2;
   type = type || "logo"; //get logo or smaller icon
-  var URI = profile.buildURI(process.env.STEAM_KEY, "IPlayerService/GetRecentlyPlayedGames/v0001", steamid);
+  var URI = steam.buildRequest(process.env.STEAM_KEY, "IPlayerService/GetRecentlyPlayedGames/v0001", steamid);
   URI += "&count=" + count;
 
   if (type === "logo") {
@@ -58,7 +59,7 @@ exports.recentGameLogos = function(steamid, count, type) {
     type = "img_icon_url";
   }
   
-  return profile.callSteamAPI(URI)
+  return steam.call(URI)
   .then(function(recentGames) {
     recentGames = recentGames.response;
 
