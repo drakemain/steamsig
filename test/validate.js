@@ -28,6 +28,6 @@ describe("Resolve Vanity Name", function() {
   });
 
   it("should return a validation error from invalid vanity names", function() {
-    return assert.isRejected(validate.resolveVanityName("l0mbax"));
+    return assert.isRejected(validate.resolveVanityName("jgkldasjl"));
   });
 });
