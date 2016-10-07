@@ -17,6 +17,29 @@ describe("steamid", function() {
   });
 });
 
+describe("trim user input", function() {
+  it("should remove trailing spaces from user input", function() {
+    var userInput = "Hello World   ";
+    var trimmedInput = validate.trimUserInput(userInput);
+
+    return assert.equal(trimmedInput, "Hello World");
+  });
+
+  it("should remove leading spaces from user input", function() {
+    var userInput = "    Hello World";
+    var trimmedInput = validate.trimUserInput(userInput);
+
+    return assert.equal(trimmedInput, "Hello World");
+  });
+
+  it("should remove slashes", function() {
+    var userInput = "/Hello/World\\";
+    var trimmedInput = validate.trimUserInput(userInput);
+
+    return assert.equal(trimmedInput, "HelloWorld");
+  });
+});
+
 describe("Resolve Vanity Name", function() {
   it("should return a steamid from valid vanity names", function() {
     return Promise.all([
