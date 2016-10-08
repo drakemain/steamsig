@@ -3,7 +3,7 @@ var request  = require('request');
 
 var SteamSigError = require('./error');
 
-exports.call = function(uri) {
+var call = exports.call = function(uri) {
   return new Promise(function(resolve, reject) {
     request({uri: uri, timeout:1000}, function(err, res, body) {
       if (!err) {
@@ -22,7 +22,7 @@ exports.call = function(uri) {
   });
 };
 
-exports.buildRequest = function(APIkey, method, ID) {
+var buildRequest = exports.buildRequest = function(APIkey, method, ID) {
   var URI = "https://api.steampowered.com/"
     + method + "/?key=" + APIkey;
 
@@ -39,4 +39,20 @@ exports.buildRequest = function(APIkey, method, ID) {
   URI += ID;
 
   return URI;
+};
+
+exports.resolveVanityName = function(name) {
+  var apiRequest = buildRequest(process.env.STEAM_KEY
+    , "ISteamUser/ResolveVanityURL/v0001"
+    , name);
+
+  return call(apiRequest)
+
+  .then(function(resolvedRequest) {
+    if (resolvedRequest.response.steamid) {
+      return Promise.resolve(resolvedRequest.response.steamid);
+    } else {
+      return Promise.reject(new SteamSigError.Validation);
+    }
+  });
 };
