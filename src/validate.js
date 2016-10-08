@@ -10,10 +10,10 @@ exports.steamid = function(input) {
     || input.length !== 17
     || isNaN(input.substr(8,16))) {
 
-    return resolveVanityName(input);
+    return false;
 
   } else {
-    return Promise.resolve(input);
+    return true;
   }
 };
 
