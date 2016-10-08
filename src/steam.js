@@ -50,9 +50,9 @@ exports.resolveVanityName = function(name) {
 
   .then(function(resolvedRequest) {
     if (resolvedRequest.response.steamid) {
-      return Promise.resolve(resolvedRequest.response.steamid);
+      return resolvedRequest.response.steamid;
     } else {
-      return Promise.reject(new SteamSigError.Validation);
+      throw new SteamSigError.Validation;
     }
   });
 };
