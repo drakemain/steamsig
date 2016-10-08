@@ -10,10 +10,14 @@ var validate = require('../src/validate');
 chai.use(chaiAsPromised);
 
 describe("steamid", function() {
-  it("should return a valid steam id or throw an error for invalid input", function() {
+  it("should return input steamid if it is valid", function() {
     return validate.steamid("76561197960419964").then(function(id) {
       assert.equal("76561197960419964", id);
     });
+  });
+
+  it("should return a validation error for invalid steamids", function() {
+    return assert.isRejected(validate.steamid("76561191234567890"));
   });
 });
 
@@ -51,6 +55,6 @@ describe("Resolve Vanity Name", function() {
   });
 
   it("should return a validation error from invalid vanity names", function() {
-    return assert.isRejected(validate.resolveVanityName("jgkldasjl"));
+    return assert.isRejected(validate.resolveVanityName("thisisnotavalidsteamid"));
   });
 });
