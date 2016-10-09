@@ -9,7 +9,7 @@ var steam = require('../src/steam');
 
 chai.use(chaiAsPromised);
 
-describe("Resolve Vanity Name", function() {
+describe("resolveVanityName", function() {
   it("should return a steamid from valid vanity names", function() {
     return Promise.all([
       steam.resolveVanityName("l0mbax").then(function(result) {

@@ -1,6 +1,5 @@
 require('dotenv').config({path: './config/.env'});
 
-// var Promise = require('bluebird');
 var chai = require('chai');
 var chaiAsPromised = require('chai-as-promised');
 var assert = chai.assert;
@@ -9,7 +8,25 @@ var validate = require('../src/validate');
 
 chai.use(chaiAsPromised);
 
-describe("Steam ID Format", function() {
+describe("checkForValidID", function() {
+  it("should return a promisified Steam ID for valid Steam ID", function() {
+    assert.becomes(validate.checkForValidID("76561197960419964"), "76561197960419964");
+  });
+
+  it("should return a promisified Steam ID if valid input has leading spaces", function() {
+    assert.becomes(validate.checkForValidID("   76561197960419964"), "76561197960419964");
+  });
+
+  it("should return a promisified Steam ID if valid input has trailing spaces", function() {
+    assert.becomes(validate.checkForValidID("76561197960419964      "), "76561197960419964");
+  });
+
+  it("should return a promisified Steam ID for valid vanity name", function() {
+    assert.becomes(validate.checkForValidID("l0mbax"), "76561197960419964");
+  });
+});
+
+describe("steamid", function() {
   it("should return true if valid Steam ID format", function() {
     assert(validate.steamid("76561197960419964"));
   });
@@ -31,7 +48,7 @@ describe("Steam ID Format", function() {
   });
 });
 
-describe("trim user input", function() {
+describe("trimUserInput", function() {
   it("should remove trailing spaces from user input", function() {
     var userInput = "Hello World   ";
     var trimmedInput = validate.trimUserInput(userInput);
