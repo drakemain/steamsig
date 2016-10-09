@@ -12,20 +12,18 @@ exports.cacheUserData = cacheUserData;
 exports.getCachedData = getCachedData;
 exports.getUserDirectory = getUserDirectory;
 
-exports.render = function(uInput) {
-  return validate.steamid(uInput)
+exports.render = function(steamid) {
+  var steamAPIRequest = steam.buildRequest(process.env.STEAM_KEY
+    , "ISteamUser/GetPlayerSummaries/v0002"
+    , steamid);
 
-  .tap(function() {console.time("|>API");})
-  //get JSON data from Steam API with Steam ID
-  .then(function(steamid) {
-    var URI = steam.buildRequest(process.env.STEAM_KEY, "ISteamUser/GetPlayerSummaries/v0002", steamid);
-    return steam.call(URI)
+  console.time("|>Get User Data");
 
-    .then(function(responseData) {
-      return responseData.response.players[0];
-    });
+  return steam.call(steamAPIRequest)
+  .then(function(responseData) {
+    console.timeEnd("|>Get User Data");
+    return responseData.response.players[0];
   })
-  .tap(function() {console.timeEnd("|>API");})
 
   .then(function(userData) {
     return Promise.join(

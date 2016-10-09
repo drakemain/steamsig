@@ -4,8 +4,18 @@ var fs      = require('fs');
 var steam         = require('./steam');
 var SteamSigError = require('./error');
 
+exports.checkForValidID = function(idToCheck) {
+  var trimmedID = trimUserInput(idToCheck);
+
+  if (steamid(trimmedID)) {
+    return Promise.resolve(trimmedID);
+  } else {
+    return steam.resolveVanityName(trimmedID);
+  }
+};
+
 //checks if input is valid Steam ID, otherwise attempts to check for custom name
-exports.steamid = function(input) { 
+var steamid = exports.steamid = function(input) {
   if (input.substr(0,7) !== "7656119"
     || input.length !== 17
     || isNaN(input.substr(8,16))) {
@@ -18,7 +28,7 @@ exports.steamid = function(input) {
 };
 
 //removes slashes and spaces from input
-exports.trimUserInput = function(input) {
+var trimUserInput = exports.trimUserInput = function(input) {
   if (input) {
     return input
     .replace(/\\/g, '')

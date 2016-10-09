@@ -9,7 +9,7 @@ var profile        = require('./src/profile');
 var SteamSigError = require('./src/error');
 var init = require('./src/initialize');
 var checkFileExists = require('./src/validate').checkFileExists;
-var trimUserInput = require('./src/validate').trimUserInput;
+var validate = require('./src/validate');
 
 var app = express();
 app.use(bparse.json());
@@ -24,14 +24,14 @@ console.log("--App started listening on port", process.env.PORT + '.');
 
 app.get('/', function(req, res) {
   if (process.env.STEAM_KEY) {
-    res.redirect('/steamIDForm');
+    res.redirect('/steam-id-form');
   } else {
     res.send("No steam key has been set! A steam API Key" +
       " must be set before API calls can be made.");
   }
 });
 
-app.get('/steamIDForm', function(req, res) {
+app.get('/steam-id-form', function(req, res) {
   res.render('form', {
     title: "Enter Steam ID"
   });
@@ -39,16 +39,21 @@ app.get('/steamIDForm', function(req, res) {
 
 //will be more uselfull later...
 app.get('/form-handler', function(req, res) {
-  var trimmedInput = trimUserInput(req.query.steamid);
+  var trimmedInput = validate.trimUserInput(req.query.steamid);
   res.redirect('/profile/' + trimmedInput);
 });
 
 app.get('/profile/:user', function(req, res) {
+  console.time("|>Total");
   console.log('--Render: ', new Date() + ': /profile/' + req.params.user);
 
-  profile.render(req.params.user)
+  validate.checkForValidID(req.params.user)
+
+  .then(profile.render)
+  
   .then(function(profileImg) {
     res.status(200).sendFile(path.resolve(profileImg));
+    console.timeEnd("|>Total");
   })
 
   .catch(SteamSigError.Validation, function(err) {
@@ -79,6 +84,3 @@ app.get('/profile/:user', function(req, res) {
     res.status(500).send("ARG! You've destroyed everything!");
   });
 });
-
-
-
