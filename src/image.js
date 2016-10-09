@@ -24,7 +24,7 @@ module.exports = function (userInfo) {
 
       .font("Arial").fontSize(20).drawText(208, 32, userInfo.personaname)
 
-      .fontSize(8).drawText(8,198, "steamsig.drakemain.com V0.7.1a");
+      .fontSize(8).drawText(8,198, "steamsig.drakemain.com V0.7.2a");
 
       if (userInfo.communityvisibilitystate !== 3) {
         compositeToFile(userInfo.sigPath, path.join('assets', 'img', 'confidential.png'))
