@@ -50,20 +50,3 @@ exports.checkFileExists = function(filePath) {
     });
   });
 };
-
-//attemps to get valid Steam ID from a custom name
-function resolveVanityName(name) {
-  var apiRequest = steam.buildRequest(process.env.STEAM_KEY
-    , "ISteamUser/ResolveVanityURL/v0001"
-    , name);
-
-  return steam.call(apiRequest)
-
-  .then(function(resolvedRequest) {
-    if (resolvedRequest.response.steamid) {
-      return Promise.resolve(resolvedRequest.response.steamid);
-    } else {
-      return Promise.reject(new SteamSigError.Validation);
-    }
-  });
-} exports.resolveVanityName = resolveVanityName;
