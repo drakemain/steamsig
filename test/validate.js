@@ -1,10 +1,12 @@
 require('dotenv').config({path: './config/.env'});
 
 var chai = require('chai');
+var path = require('path');
 var chaiAsPromised = require('chai-as-promised');
 var assert = chai.assert;
 
 var validate = require('../src/validate');
+var SteamSigError = require('../src/error');
 
 chai.use(chaiAsPromised);
 
@@ -68,5 +70,15 @@ describe("trimUserInput", function() {
     var trimmedInput = validate.trimUserInput(userInput);
 
     return assert.equal(trimmedInput, "HelloWorld");
+  });
+});
+
+describe("checkFileExists", function() {
+  it("should return the path of the file if it exists", function() {
+    assert.becomes(validate.checkFileExists(path.join('src', 'validate.js')), "src/validate.js");
+  });
+
+  it("should throw a SteamSig FileDNE error if file doesn't exist", function() {
+    assert.isRejected(validate.checkFileExists('fileThatDoesntExist'), SteamSigError.FileDNE);
   });
 });
