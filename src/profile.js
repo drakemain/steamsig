@@ -7,6 +7,7 @@ var imgProcess = require('./image');
 var parseGame = require('./parser').game;
 var recentGameLogos = require('./parser').recentGameLogos;
 var steam = require('./steam');
+var SteamSigError = require('./error');
 
 exports.cacheUserData = cacheUserData;
 exports.getCachedData = getCachedData;
@@ -23,7 +24,13 @@ exports.render = function(steamid) {
   return steam.call(steamAPIRequest)
   .then(function(responseData) {
     console.timeEnd("|>Get User Data");
-    return responseData.response.players[0];
+    
+    if (responseData.response.players.length > 0) {
+      return responseData.response.players[0];
+    } else {
+      return Promise.reject(new SteamSigError.Validation());
+    }
+    
   })
 
   .then(function(userData) {
