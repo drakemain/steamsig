@@ -29,7 +29,7 @@ exports.timecreated = function(time) {
 
 //returns information about a game given a game id
 exports.game = function(gameID, dataToReturn) {
-  var URI = steam.buildRequest(process.env.STEAM_KEY, "ISteamUserStats/GetSchemaForGame/v2", gameID);
+  var URI = steam.buildRequest("ISteamUserStats/GetSchemaForGame/v2", gameID);
 
   if (gameID) {
     return steam.call(URI)
@@ -50,7 +50,7 @@ exports.game = function(gameID, dataToReturn) {
 exports.recentGameLogos = function(steamid, count, type) {
   count = count || 2;
   type = type || "logo"; //get logo or smaller icon
-  var URI = steam.buildRequest(process.env.STEAM_KEY, "IPlayerService/GetRecentlyPlayedGames/v0001", steamid);
+  var URI = steam.buildRequest("IPlayerService/GetRecentlyPlayedGames/v0001", steamid);
   URI += "&count=" + count;
 
   if (type === "logo") {

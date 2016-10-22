@@ -13,9 +13,10 @@ exports.getCachedData = getCachedData;
 exports.getUserDirectory = getUserDirectory;
 
 exports.render = function(steamid) {
-  var steamAPIRequest = steam.buildRequest(process.env.STEAM_KEY
-    , "ISteamUser/GetPlayerSummaries/v0002"
-    , steamid);
+  var steamAPIRequest = steam.buildRequest(
+    "ISteamUser/GetPlayerSummaries/v0002"
+    , steamid
+  );
 
   console.time("|>Get User Data");
 

@@ -22,9 +22,9 @@ var call = exports.call = function(uri) {
   });
 };
 
-var buildRequest = exports.buildRequest = function(APIkey, method, ID) {
+var buildRequest = exports.buildRequest = function(method, ID) {
   var URI = "https://api.steampowered.com/"
-    + method + "/?key=" + APIkey;
+    + method + "/?key=" + process.env.STEAM_KEY;
 
   if (method === "ISteamUser/GetPlayerSummaries/v0002") {
     URI += "&steamids=";
@@ -42,9 +42,10 @@ var buildRequest = exports.buildRequest = function(APIkey, method, ID) {
 };
 
 exports.resolveVanityName = function(name) {
-  var apiRequest = buildRequest(process.env.STEAM_KEY
-    , "ISteamUser/ResolveVanityURL/v0001"
-    , name);
+  var apiRequest = buildRequest(
+    "ISteamUser/ResolveVanityURL/v0001"
+    , name
+  );
 
   return call(apiRequest)
 
