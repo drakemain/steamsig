@@ -17,6 +17,7 @@
     "url": "https://github.com/drakemain/steamsig.git"
   },
   "scripts": {
+    "start": "node app.js",
     "test": "mocha"
   },
   "devDependencies": {
