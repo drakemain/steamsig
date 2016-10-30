@@ -1,4 +1,3 @@
-var Promise = require('bluebird');
 var chai = require('chai');
 var chaiAsPromised = require('chai-as-promised');
 var assert = chai.assert;
