@@ -3,7 +3,7 @@ var path     = require('path');
 var fs       = Promise.promisifyAll(require("fs"));
 
 var validate = require('./validate');
-var imgProcess = require('./image');
+var draw = require('./render');
 var parseGame = require('./parser').game;
 var recentGameLogos = require('./parser').recentGameLogos;
 var steam = require('./steam');
@@ -53,7 +53,7 @@ exports.render = function(steamid) {
     //cache data and render profile image
     .then(function() {
       cacheUserData(userData);
-      return imgProcess(userData);
+      return draw(userData);
     });
   });
 };
