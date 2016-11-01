@@ -10,7 +10,8 @@
     "express": "^4.13.3",
     "express-handlebars": "^3.0.0",
     "gm": "^1.21.1",
-    "request": "^2.65.0"
+    "request": "^2.65.0",
+    "request-promise": "^4.1.1"
   },
   "license": "BSD-3-Clause",
   "repository": {
