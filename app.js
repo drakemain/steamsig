@@ -45,7 +45,7 @@ app.get('/form-handler', function(req, res) {
 
 app.get('/profile/:user', function(req, res) {
   console.time("|>Total");
-  console.log('--Render: ', new Date() + ': /profile/' + req.params.user);
+  console.log('\n', new Date() + ': ' + req.params.user);
 
   validate.checkForValidID(req.params.user)
 

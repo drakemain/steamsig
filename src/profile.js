@@ -60,6 +60,7 @@ exports.render = function(steamid) {
 
 function cacheUserData(userData) {
   return new Promise(function(resolve, reject) {
+    console.time('|>Cache user data');
     var filePath = path.join(userData.userDirectory, 'userData.JSON');
     var userDataString = JSON.stringify(userData);
 
@@ -67,6 +68,7 @@ function cacheUserData(userData) {
       if (err) {
         reject(err);
       } else {
+        console.timeEnd('|>Cache user data');
         resolve(userData);
       }
     });

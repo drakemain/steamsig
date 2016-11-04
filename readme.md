@@ -14,6 +14,6 @@ Generates a steam profile png image. It will display dynamic information (such a
 
 >>What information is displayed
 
-Graphics Magick binaries are needed for this to run. They can be obtained at http://www.graphicsmagick.org/.
+The Canvas-based renderer requires Cairo and Pango. Directions can be found here: https://github.com/Automattic/node-canvas
 
 See the current master branch in action here: http://steamsig.drakemain.com.
