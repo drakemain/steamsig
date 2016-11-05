@@ -52,7 +52,8 @@ app.get('/profile/:user', function(req, res) {
   .then(profile.render)
   
   .then(function(profileImg) {
-    res.status(200).sendFile(path.resolve(profileImg));
+    console.log(profileImg);
+    res.status(200).type('png').sendFile(profileImg);
     console.timeEnd("|>Total");
   })
 

@@ -27,24 +27,33 @@ module.exports = function(userInfo) {
 
   writeStatus(userInfo);
 
-  return placeImageByURL(userInfo.avatarfull, 8, 8)
+  return Promise.join(
+    placeImageByURL(userInfo.avatarfull, 8, 8),
+    placeImageByURL(userInfo.recentGameLogos[0], 208, 133, .72),
+    placeImageByURL(userInfo.recentGameLogos[1], 350, 133, .72),
 
-  .then(placeImageByURL(userInfo.recentGameLogos[0], 208, 133, .72))
-
-  .then(placeImageByURL(userInfo.recentGameLogos[1], 350, 133, .72))
-
-  .then(function() {
-    return new Promise(function(resolve) {
+    function() {
+      return new Promise(function(resolve) {
       var out = fs.createWriteStream(userInfo.sigPath);
-      var stream = canvas.pngStream();
+      var imgStream = canvas.pngStream();
+      // var buffer = canvas.toBuffer();
+      // resolve(buffer);
 
-      stream.on('data', function(chunk) {
+      imgStream.on('data', function(chunk) {
         out.write(chunk);
       });
 
-      stream.on('end', function() {
-        console.timeEnd('|>Render');
-        resolve(path.resolve(userInfo.sigPath));
+      imgStream.on('error', function(err) {
+        throw err;
+      });
+
+      imgStream.on('end', function() {
+        console.log('stream end');
+        out.end(null, null, function() {
+          console.timeEnd('|>Render');
+          console.log('test');
+          resolve(path.resolve(userInfo.sigPath));
+        });
       });
     });
   });
@@ -78,14 +87,14 @@ function fillCanvas(color) {
 function placeImageByURL(imgURL, x, y, scale) {
   if (!imgURL) {return;}
 
-  return request.get({url: imgURL, encoding: null}, function(err, res, body) {
-    if (err) {console.error(err);}
+  return request.get({url: imgURL, encoding: null})
+    .then(function(body) {
 
     scale = scale || 1;
     var img = new Image();
 
     img.onerror = function(error) {
-      console.error(error);
+      throw error;
     };
 
     img.onload = function() {
@@ -100,7 +109,7 @@ function placeImageByURL(imgURL, x, y, scale) {
       sig.restore();
     };
 
-    img.src = new Buffer(body, 'binary');
+    img.src = body;
   });
 }
 
@@ -111,3 +120,40 @@ function drawText(text, font, size, x, y) {
   sig.fillText(text, x, y);
   sig.restore();
 }
+
+// function placeImageByURL(imgURL, x, y, scale) {
+//   return request.get({url: imgURL, encoding: null})
+
+//   .then(loadImage)
+
+//   .then(function(image) {
+//     sig.save();
+//     sig.imageSmoothingEnabled = true;
+
+//     var height = Math.floor(image.height * scale);
+//     var width = Math.floor(image.width * scale);
+
+//     console.log('drawing', image);
+
+//     drawText("TEST", "Arial", "8px", x, y);
+
+//     sig.drawImage(image, x, y, width, height);
+
+//     sig.restore();
+//   });
+// }
+
+// function loadImage(image) {
+//   return new Promise(function(resolve, reject) {
+//     var img = new Image();
+
+//     img.onerror = reject;
+
+//     img.onload = function() {
+//       resolve(img);
+//     };
+
+//     img.src = image;
+//   });
+// }
+
