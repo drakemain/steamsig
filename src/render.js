@@ -48,10 +48,8 @@ module.exports = function(userInfo) {
       });
 
       imgStream.on('end', function() {
-        console.log('stream end');
         out.end(null, null, function() {
           console.timeEnd('|>Render');
-          console.log('test');
           resolve(path.resolve(userInfo.sigPath));
         });
       });
