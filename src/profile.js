@@ -65,24 +65,17 @@ exports.render = function(steamid) {
 };
 
 function cacheUserData(userData) {
-  return new Promise(function(resolve, reject) {
-    console.time('|>Cache user data');
-    var filePath = path.join(userData.directory, 'userData.JSON');
-    var userDataString = JSON.stringify(userData);
+  console.time('|>Cache user data');
+  var filePath = path.join(userData.directory, 'userData.JSON');
+  var userDataString = JSON.stringify(userData);
 
-    fs.writeFile(filePath, userDataString, function(err) {
-      if (err) {
-        reject(err);
-      } else {
-        console.timeEnd('|>Cache user data');
-        resolve(userData);
-      }
-    });
+  return fs.writeFileAsync(filePath, userDataString).then(function() {
+    console.timeEnd('|>Cache user data');
   });
 }
 
-function getCachedData(steamid) {
-  return getUserDirectory(steamid)
+function getCachedData(dataPath) {
+  fs.readFileAsync(dataPath)
 
   .then(function(dir) {
     var dataPath = path.join(dir, "userData.JSON");
