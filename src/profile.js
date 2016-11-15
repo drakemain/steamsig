@@ -33,19 +33,25 @@ exports.render = function(steamid) {
     
   })
 
-  .then(function(userData) {
-    return Promise.join(
-      //gather some additional information to append to JSON object
-      parseGame(userData.gameid, 'gameName'),
-      recentGameLogos(userData.steamid),
-      getUserDirectory(userData.steamid),
+  .then(function(responseData) {
+    var userData = {};
+    userData.steam = responseData;
 
-      //append additional information to JSON object
+    return Promise.join(
+      // resolve game ID into name, if available
+      parseGame(userData.steam.gameid, 'gameName'),
+      // get array of URLs for logos of recently played games
+      recentGameLogos(userData.steam.steamid),
+      getUserDirectory(userData.steam.steamid),
+
       function(game, recentGameLogos, userDir) {
+        // processed Steam data
+        userData.steam.currentGame = game;
+        userData.steam.recentGameLogos = recentGameLogos;
+
+        // additional user information
         userData.lastAPICall = new Date();
-        userData.currentGame = game;
-        userData.recentGameLogos = recentGameLogos;
-        userData.userDirectory = userDir;
+        userData.directory = userDir;
         userData.sigPath = path.join(userDir, "sig.png");
       }
     )
@@ -61,7 +67,7 @@ exports.render = function(steamid) {
 function cacheUserData(userData) {
   return new Promise(function(resolve, reject) {
     console.time('|>Cache user data');
-    var filePath = path.join(userData.userDirectory, 'userData.JSON');
+    var filePath = path.join(userData.directory, 'userData.JSON');
     var userDataString = JSON.stringify(userData);
 
     fs.writeFile(filePath, userDataString, function(err) {

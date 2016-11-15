@@ -20,17 +20,17 @@ module.exports = function(userInfo) {
   sig.lineWidth = 1;
   sig.strokeRect(200.5, 8.5, 291, 183);
 
-  drawText(userInfo.personaname, "Helvetica", "20px", 208, 32);
-  drawText("User for\n" + parse.timecreated(userInfo.timecreated).age
+  drawText(userInfo.steam.personaname, "Helvetica", "20px", 208, 32);
+  drawText("User for\n" + parse.timecreated(userInfo.steam.timecreated).age
     , "Helvetica", "14px", 415, 32);
   drawText("steamsig.drakemain.com V0.8.0a", "Arial", "8px", 8, 198);
 
-  writeStatus(userInfo);
+  writeStatus(userInfo.steam);
 
   return Promise.join(
-    placeImageByURL(userInfo.avatarfull, 8, 8),
-    placeImageByURL(userInfo.recentGameLogos[0], 208, 133, .72),
-    placeImageByURL(userInfo.recentGameLogos[1], 350, 133, .72),
+    placeImageByURL(userInfo.steam.avatarfull, 8, 8),
+    placeImageByURL(userInfo.steam.recentGameLogos[0], 208, 133, .72),
+    placeImageByURL(userInfo.steam.recentGameLogos[1], 350, 133, .72),
 
     function() {
       return new Promise(function(resolve) {
@@ -58,18 +58,18 @@ module.exports = function(userInfo) {
 };
 
 
-function writeStatus(userInfo) {
+function writeStatus(userSteamData) {
   var status = "";
 
-  if (userInfo.gameid) {
+  if (userSteamData.gameid) {
     status = "In-Game";
 
-    if (userInfo.currentGame) {
-      status += ": " + userInfo.currentGame;
+    if (userSteamData.currentGame) {
+      status += ": " + userSteamData.currentGame;
     }
 
   } else {
-    status = parse.personastate(userInfo.personastate);
+    status = parse.personastate(userSteamData.personastate);
   }
 
   drawText(status, "Helvetica", "14px", 216, 53);
