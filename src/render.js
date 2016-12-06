@@ -12,25 +12,34 @@ var sig = canvas.getContext('2d');
 
 module.exports = function(userInfo) {
   console.time('|>Render');
-  var r = 100, g = 100, b = 100;
 
-  canvas.height = 200; canvas.width = 500;
+  canvas.height = userInfo.canvas.size.height; 
+  canvas.width = userInfo.canvas.size.width;
 
-  fillCanvas('rgb(' +r +',' +g +',' +b +')'); //background
+  var canvasColor = userInfo.canvas.bgcolor;
+  fillCanvas('rgb(' + canvasColor.r + ',' + canvasColor.g + ',' + canvasColor.b + ')');
   sig.lineWidth = 1;
   sig.strokeRect(200.5, 8.5, 291, 183);
 
-  drawText(userInfo.steam.personaname, "Helvetica", "20px", 208, 32);
-  drawText("User for\n" + parse.timecreated(userInfo.steam.timecreated).age
-    , "Helvetica", "14px", 415, 32);
-  drawText("steamsig.drakemain.com V0.8.0a", "Arial", "8px", 8, 198);
+  drawTextElement(userInfo.steam.personaname, userInfo.canvas.elements.personaname);
+  drawTextElement("User for\n" + parse.timecreated(userInfo.steam.timecreated).age
+    , userInfo.canvas.elements.age);
+  drawText("steamsig.drakemain.com V0.8.1a", "Arial", "8px", 8, 198);
 
   writeStatus(userInfo.steam);
 
   return Promise.join(
-    placeImageByURL(userInfo.steam.avatarfull, 8, 8),
-    placeImageByURL(userInfo.steam.recentGameLogos[0], 208, 133, .72),
-    placeImageByURL(userInfo.steam.recentGameLogos[1], 350, 133, .72),
+    placeImageByURL(userInfo.steam.avatarfull
+      , userInfo.canvas.elements.avatar.posX
+      , userInfo.canvas.elements.avatar.posY),
+    placeImageByURL(userInfo.steam.recentGameLogos[0]
+      , userInfo.canvas.elements.recentGameLogos.logos[0].posX
+      , userInfo.canvas.elements.recentGameLogos.logos[0].posY
+      , userInfo.canvas.elements.recentGameLogos.logos[0].scale),
+    placeImageByURL(userInfo.steam.recentGameLogos[1]
+      , userInfo.canvas.elements.recentGameLogos.logos[1].posX
+      , userInfo.canvas.elements.recentGameLogos.logos[1].posY
+      , userInfo.canvas.elements.recentGameLogos.logos[1].scale),
 
     function() {
       return new Promise(function(resolve) {
@@ -56,6 +65,15 @@ module.exports = function(userInfo) {
     });
   });
 };
+
+function drawTextElement(text, properties) {
+  var thisFont = properties.size + " " + properties.font;
+  
+  sig.save();
+  sig.font = thisFont;
+  sig.fillText(text, properties.posX, properties.posY);
+  sig.restore();
+}
 
 
 function writeStatus(userSteamData) {
@@ -85,10 +103,11 @@ function fillCanvas(color) {
 function placeImageByURL(imgURL, x, y, scale) {
   if (!imgURL) {return;}
 
+  scale = scale || 1;
+
   return request.get({url: imgURL, encoding: null})
     .then(function(body) {
 
-    scale = scale || 1;
     var img = new Image();
 
     img.onerror = function(error) {
@@ -113,6 +132,7 @@ function placeImageByURL(imgURL, x, y, scale) {
 
 function drawText(text, font, size, x, y) {
   var thisFont = size + " " + font;
+  
   sig.save();
   sig.font = thisFont;
   sig.fillText(text, x, y);

@@ -35,6 +35,8 @@ exports.render = function(steamid) {
 
   .then(function(responseData) {
     var userData = {};
+    // this 'canvas' data will eventually be retrieved from a web form
+    userData.canvas = getCanvasData();
     userData.steam = responseData;
 
     return Promise.join(
@@ -46,6 +48,8 @@ exports.render = function(steamid) {
 
       function(game, recentGameLogos, userDir) {
         // processed Steam data
+          // TODO: parse timecreated
+          // TODO: parse personastate
         userData.steam.currentGame = game;
         userData.steam.recentGameLogos = recentGameLogos;
 
@@ -103,4 +107,33 @@ function getUserDirectory(steamid) {
       } else {resolve(userDir);}   
     });
   });
+}
+
+// temporary until web form is implemented
+function getCanvasData() {
+  var thisCanvas = {}
+
+  thisCanvas.elements = {
+    "avatar" : {"active" : true, "posX" : 8, "posY" : 8, "size" : "full"},
+    "recentGameLogos" : {"active" : true, 
+      "logos" : [
+        {"posX" : 208, "posY" : 133, "scale" : .72},
+        {"posX" : 350, "posY" : 133, "scale" : .72}
+      ]
+    },
+
+    "steamid" : {"active" : false},
+    "personaname" : {"active" : true, "posX" : 208, "posY" : 32,
+                      "font" : "Helvetica", "size" : "20px"},
+    "age" : {"active" : true, "posX" : 415, "posY" : 32,
+              "font" : "Helvetica", "size" : "14px"}
+  };
+
+
+  // properties
+  thisCanvas.bgcolor = {"r" : 100, "g" : 100, "b" : 100}
+  thisCanvas.size = {"height" : 200, "width" : 500}
+
+
+  return thisCanvas;
 }
