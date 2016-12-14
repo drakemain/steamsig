@@ -103,8 +103,6 @@ function fillCanvas(color) {
 function placeImageByURL(imgURL, x, y, scale) {
   if (!imgURL) {return;}
 
-  console.log(x, y, scale);
-
   scale = scale || 1;
 
   return request.get({url: imgURL, encoding: null})
