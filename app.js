@@ -17,6 +17,8 @@ app.use(bparse.urlencoded({ extended: true }));
 app.engine('handlebars', hbars({defaultLayout: 'main'}));
 app.set('view engine', 'handlebars');
 
+var parsedElements = require('./assets/JSON/elements');
+
 init();
 process.env.PORT = process.env.PORT || 3000;
 app.listen(process.env.PORT);
@@ -33,7 +35,8 @@ app.get('/', function(req, res) {
 
 app.get('/steam-id-form', function(req, res) {
   res.render('form', {
-    title: "Enter Steam ID"
+    title: "Enter Steam ID",
+    elements: parsedElements
   });
 });
 
@@ -41,6 +44,8 @@ app.get('/steam-id-form', function(req, res) {
 app.get('/form-handler', function(req, res) {
   var trimmedInput = validate.trimUserInput(req.query.steamid);
   res.redirect('/profile/' + trimmedInput);
+
+  console.log(req.query);
 });
 
 app.get('/profile/:user', function(req, res) {

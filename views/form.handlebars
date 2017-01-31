@@ -3,12 +3,27 @@
 <p>
   <form action='/form-handler' method='get'>
     <p>
-      Enter your Steam ID or custom name:<br>
-      <input type='text' name='steamid'>
-      <input type='submit' value='Submit'><br>
+
+      <div>
+        Enter your Steam ID or custom name:<br>
+        <input type='text' name='steamid'><br>
+      </div>
+
       NOTE: custom name is the name that appears at the end of your URL.<br>
-      Example: for steamcommunity.com/id/robinwalker, you would use robinwalker.
+      Example: for steamcommunity.com/id/robinwalker, you would use robinwalker.<br><br>
+      
+      <div>
+        Customization Options:<br>
+
+        
+        {{#each elements}}
+          {{this}}: <input type='checkbox' name='{{@key}}' checked='true'>
+        {{/each}}
+      </div>
+
+      <input type='submit' value='Submit'><br>
     </p>
+
     Keep in mind that this is a work in progress!<br>
 
     <ul>Updates:
