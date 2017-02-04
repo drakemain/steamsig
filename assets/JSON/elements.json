@@ -2,5 +2,6 @@
   "personaname": "Profile Name",
   "recentGameLogos": "Recently Played Games",
   "avatar": "Avatar",
-  "age": "Profile Age"
+  "age": "Profile Age",
+  "test": "Test Element"
 }

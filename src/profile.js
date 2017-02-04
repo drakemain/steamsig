@@ -111,7 +111,7 @@ function getUserDirectory(steamid) {
 
 // temporary until web form is implemented
 function getCanvasData() {
-  var thisCanvas = {}
+  var thisCanvas = {};
 
   thisCanvas.elements = {
     "avatar" : {"active" : true, "posX" : 8, "posY" : 8, "size" : "full"},
@@ -131,8 +131,8 @@ function getCanvasData() {
 
 
   // properties
-  thisCanvas.bgcolor = {"r" : 100, "g" : 100, "b" : 100}
-  thisCanvas.size = {"height" : 200, "width" : 500}
+  thisCanvas.bgcolor = {"r" : 100, "g" : 100, "b" : 100};
+  thisCanvas.size = {"height" : 200, "width" : 500};
 
 
   return thisCanvas;
