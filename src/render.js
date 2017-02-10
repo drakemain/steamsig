@@ -43,7 +43,7 @@ module.exports = function(userInfo) {
 
     function() {
       return new Promise(function(resolve) {
-      var out = fs.createWriteStream(userInfo.sigPath);
+      var out = fs.createWriteStream(userInfo.directory + '/sig.png');
       var imgStream = canvas.pngStream();
       // var buffer = canvas.toBuffer();
       // resolve(buffer);
@@ -59,7 +59,7 @@ module.exports = function(userInfo) {
       imgStream.on('end', function() {
         out.end(null, null, function() {
           console.timeEnd('|>Render');
-          resolve(path.resolve(userInfo.sigPath));
+          resolve(userInfo.steam.steamid);
         });
       });
     });
