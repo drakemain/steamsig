@@ -5,7 +5,7 @@ var SteamSigError = require('./error');
 
 var call = exports.call = function(uri) {
   return new Promise(function(resolve, reject) {
-    request({uri: uri, timeout:1000}, function(err, res, body) {
+    request({uri: uri, timeout:4000}, function(err, res, body) {
       if (!err) {
         var userData = JSON.parse(body);
 
