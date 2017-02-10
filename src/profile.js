@@ -9,11 +9,12 @@ var recentGameLogos = require('./parser').recentGameLogos;
 var steam = require('./steam');
 var SteamSigError = require('./error');
 
-exports.cacheUserData = cacheUserData;
-exports.getCachedData = getCachedData;
+exports.render = render;
+exports.update = update;
+exports.getCache = getCache;
 exports.getUserDirectory = getUserDirectory;
 
-exports.render = function(steamid) {
+function render(steamid) {
   var steamAPIRequest = steam.buildRequest(
     "ISteamUser/GetPlayerSummaries/v0002"
     , steamid
@@ -54,7 +55,7 @@ exports.render = function(steamid) {
         userData.steam.recentGameLogos = recentGameLogos;
 
         // additional user information
-        userData.lastAPICall = new Date();
+        userData.lastUpdated = new Date();
         userData.directory = userDir;
         userData.sigPath = path.join(userDir, "sig.png");
       }
@@ -66,7 +67,40 @@ exports.render = function(steamid) {
       return draw(userData);
     });
   });
-};
+}
+
+function update(steamid) {
+  return shouldUpdate(steamid)
+
+  .then(function(shouldUpdateProfile) {
+    if (shouldUpdateProfile) {
+      return render(steamid)
+
+      .then(function(steamid) {
+        return path.join('assets', 'profiles', steamid, 'sig.png');
+      });
+    }
+
+    console.log('Skipped rendering profile');
+    return path.join('assets', 'profiles', steamid, 'sig.png');
+  });
+}
+
+function shouldUpdate(steamid) {
+  return getCache(steamid)
+
+  .then(function(cache) {
+    var lastUpdated = new Date(cache.lastUpdated);
+    var currentDate = new Date();
+    var secondsSinceProfileUpdate = Math.ceil((currentDate - lastUpdated) / 1000);
+
+    if (secondsSinceProfileUpdate > 30) {
+      return true;
+    }
+
+    return false;
+  });
+}
 
 function cacheUserData(userData) {
   console.time('|>Cache user data');
@@ -78,19 +112,14 @@ function cacheUserData(userData) {
   });
 }
 
-function getCachedData(dataPath) {
-  fs.readFileAsync(dataPath)
+function getCache(steamid) {
+  var pathToCache = path.join('assets', 'profiles', steamid, 'userData.JSON');
 
-  .then(function(dir) {
-    var dataPath = path.join(dir, "userData.JSON");
+  return validate.checkFileExists(pathToCache)
+  
+  .then(fs.readFileAsync)
 
-    return validate.checkFileExists(dataPath);
-  })
-
-  .then(function(dataPath) {
-    console.log(dataPath);
-    return fs.readFileAsync(dataPath, "utf8");
-  });
+  .then(JSON.parse);
 }
 
 function getUserDirectory(steamid) {

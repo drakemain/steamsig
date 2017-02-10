@@ -82,26 +82,26 @@ app.get('/form-handler', function(req, res) {
 
 app.get('/profile/:user', function(req, res) {
   if (validate.steamid(req.params.user)) {
-    var sigPath = path.resolve(path.join('assets', 'profiles', req.params.user, 'sig.png'));
+    profile.update(req.params.user)
 
-    validate.checkFileExists(sigPath)
+    .then(validate.checkFileExists)
 
-    // update sig
-    
-    .then(function(newSigPath) {
+    .then(function(verifiedSigPath) {
+      var absoluteSigPath = path.resolve(verifiedSigPath);
+
       console.time('|> Retrieve file');
-      res.status(200).type('png').sendFile(newSigPath);
+      res.status(200).type('png').sendFile(absoluteSigPath);
       console.timeEnd('|> Retrieve file');
     })
 
     .catch(SteamSigError.FileDNE, function(err) {
-      console.error(err);
+      console.error(err.message);
       res.redirect('/steam-id-form/?steamid=' + req.params.user);
     })
 
     .catch(function(err) {
       console.error(err);
-      res.send("An error occured while attempting to retrieve or create your profile");
+      res.send("An error occured while attempting to retrieve your profile");
     });
 
   } else {
