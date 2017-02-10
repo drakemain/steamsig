@@ -33,32 +33,22 @@ app.get('/', function(req, res) {
   }
 });
 
-app.get('/steam-id-form', function(req, res) {
+app.get('/steam-id-form/', function(req, res) {
   res.render('form', {
     title: "Enter Steam ID",
+    steamIDInputValue: req.query.steamid,
     elements: parsedElements
   });
 });
 
 //will be more uselfull later...
 app.get('/form-handler', function(req, res) {
-  var trimmedInput = validate.trimUserInput(req.query.steamid);
-  res.redirect('/profile/' + trimmedInput);
-
-  console.log(req.query);
-});
-
-app.get('/profile/:user', function(req, res) {
-  console.time("|>Total");
-  console.log('\n', new Date() + ': ' + req.params.user);
-
-  validate.checkForValidID(req.params.user)
+  validate.checkForValidID(req.query.steamid)
 
   .then(profile.render)
-  
-  .then(function(profileImg) {
-    res.status(200).type('png').sendFile(profileImg);
-    console.timeEnd("|>Total");
+
+  .then(function(steamid) {
+    res.redirect('/profile/' + steamid);
   })
 
   .catch(SteamSigError.Validation, function(err) {
@@ -88,4 +78,47 @@ app.get('/profile/:user', function(req, res) {
     
     res.status(500).send("ARG! You've destroyed everything!");
   });
+});
+
+app.get('/profile/:user', function(req, res) {
+  if (validate.steamid(req.params.user)) {
+    var sigPath = path.resolve(path.join('assets', 'profiles', req.params.user, 'sig.png'));
+
+    validate.checkFileExists(sigPath)
+
+    // update sig
+    
+    .then(function(newSigPath) {
+      console.time('|> Retrieve file');
+      res.status(200).type('png').sendFile(newSigPath);
+      console.timeEnd('|> Retrieve file');
+    })
+
+    .catch(SteamSigError.FileDNE, function(err) {
+      console.error(err);
+      res.redirect('/steam-id-form/?steamid=' + req.params.user);
+    })
+
+    .catch(function(err) {
+      console.error(err);
+      res.send("An error occured while attempting to retrieve or create your profile");
+    });
+
+  } else {
+    validate.checkForValidID(req.params.user)
+
+    .then(function(steamid) {
+      console.log('/profile/' + steamid);
+      res.redirect('/profile/' + steamid);
+    })
+
+    .catch(SteamSigError.Validation, function(err) {
+      console.error(err.message);
+      res.status(400).send("The name or ID doesn't seem to be associated with a Steam account.");
+    });
+  }
+});
+
+app.use(function(req, res) {
+  res.status(404).send("Can't find requested page.");
 });
