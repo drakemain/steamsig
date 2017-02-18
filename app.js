@@ -53,7 +53,11 @@ app.get('/form-handler', function(req, res) {
 
   .catch(SteamSigError.Validation, function(err) {
     console.error(err.message);
-    res.status(400).send("The name or ID doesn't seem to be associated with a Steam account.");
+    res.status(400).render('error', {
+      title: 'Validation Error',
+      message: err.clientMessage
+    });
+
   })
   .catch(SteamSigError.TimeOut, function(err) {
     console.error(err.message);
@@ -66,17 +70,24 @@ app.get('/form-handler', function(req, res) {
     .then(function(filePath) {
       console.log('Cached profile sent');
       res.sendFile(path.resolve(filePath));
+    })
+    .catch(SteamSigError.FileDNE, function(err) {
+      console.error(err.message);
+      
+      res.render('error', {
+        title: 'Timeout Error',
+        message: "Steam isn't responding. " + err.clientMessage
+      });
     });
-  })
-  .catch(SteamSigError.FileDNE, function(err) {
-    console.error(err.message);
-    res.send("Your profile is not cached and Steam is not responding to requests!");
   })
   .catch(function(err) {
     console.error("An unhandled error occured.");
     console.trace(err.stack);
-    
-    res.status(500).send("ARG! You've destroyed everything!");
+
+    res.render('error', {
+      title: 'Error',
+      message: 'You\'ve destroyed everything!'
+    });
   });
 });
 
@@ -89,9 +100,9 @@ app.get('/profile/:user', function(req, res) {
     .then(function(verifiedSigPath) {
       var absoluteSigPath = path.resolve(verifiedSigPath);
 
-      console.time('|> Retrieve file');
+      console.time('|>Send file');
       res.status(200).type('png').sendFile(absoluteSigPath);
-      console.timeEnd('|> Retrieve file');
+      console.timeEnd('|>Send file');
     })
 
     .catch(SteamSigError.FileDNE, function(err) {
@@ -101,7 +112,10 @@ app.get('/profile/:user', function(req, res) {
 
     .catch(function(err) {
       console.error(err);
-      res.send("An error occured while attempting to retrieve your profile");
+      res.render('error', {
+        title: 'Error',
+        message: 'Something went wrong. :('
+      });
     });
 
   } else {
@@ -114,9 +128,14 @@ app.get('/profile/:user', function(req, res) {
 
     .catch(SteamSigError.Validation, function(err) {
       console.error(err.message);
-      res.status(400).send("The name or ID doesn't seem to be associated with a Steam account.");
+      res.status(400).render('error', {
+        title: 'Validation Error',
+        message: err.clientMessage
+      });
     });
   }
+
+  console.log('-');
 });
 
 app.use(function(req, res) {
