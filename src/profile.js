@@ -74,14 +74,15 @@ function update(steamid) {
 
   .then(function(shouldUpdateProfile) {
     if (shouldUpdateProfile) {
-      return render(steamid)
+      return render(steamid);
 
-      .then(function(steamid) {
-        return path.join('assets', 'profiles', steamid, 'sig.png');
-      });
+      // .then(function(steamid) {
+      //   return path.join('assets', 'profiles', steamid, 'sig.png');
+      // });
     }
+  })
 
-    console.log('Skipped rendering profile');
+  .then(function() {
     return path.join('assets', 'profiles', steamid, 'sig.png');
   });
 }
@@ -98,7 +99,15 @@ function shouldUpdate(steamid) {
       return true;
     }
 
+    console.log('Skipping profile update.. (' 
+      + secondsSinceProfileUpdate + 's since last update)');
+
     return false;
+  })
+
+  .catch(SteamSigError.FileDNE, function() {
+    console.log('Profile does not yet exist. Creating..');
+    return true;
   });
 }
 

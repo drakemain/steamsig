@@ -42,6 +42,7 @@ var buildRequest = exports.buildRequest = function(method, ID) {
 };
 
 exports.resolveVanityName = function(name) {
+  console.time('|>Resolving vanity name: ' + name);
   var apiRequest = buildRequest(
     "ISteamUser/ResolveVanityURL/v0001"
     , name
@@ -50,6 +51,7 @@ exports.resolveVanityName = function(name) {
   return call(apiRequest)
 
   .then(function(resolvedRequest) {
+    console.timeEnd('|>Resolving vanity name: ' + name);
     if (resolvedRequest.response.steamid) {
       return resolvedRequest.response.steamid;
     } else {

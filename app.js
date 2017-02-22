@@ -45,8 +45,6 @@ app.get('/steam-id-form/', function(req, res) {
 app.get('/form-handler', function(req, res) {
   validate.checkForValidID(req.query.steamid)
 
-  .then(profile.render)
-
   .then(function(steamid) {
     res.redirect('/profile/' + steamid);
   })
@@ -92,12 +90,15 @@ app.get('/form-handler', function(req, res) {
 });
 
 app.get('/profile/:user', function(req, res) {
+  console.log('-');
   if (validate.steamid(req.params.user)) {
     profile.update(req.params.user)
 
     .then(validate.checkFileExists)
 
     .then(function(verifiedSigPath) {
+      console.log(verifiedSigPath);
+
       var absoluteSigPath = path.resolve(verifiedSigPath);
 
       console.time('|>Send file');
@@ -107,7 +108,11 @@ app.get('/profile/:user', function(req, res) {
 
     .catch(SteamSigError.FileDNE, function(err) {
       console.error(err.message);
-      res.redirect('/steam-id-form/?steamid=' + req.params.user);
+
+      res.render('error', {
+        title: 'Error',
+        message: err.clientMessage
+      });
     })
 
     .catch(function(err) {
@@ -117,12 +122,10 @@ app.get('/profile/:user', function(req, res) {
         message: 'Something went wrong. :('
       });
     });
-
   } else {
     validate.checkForValidID(req.params.user)
 
     .then(function(steamid) {
-      console.log('/profile/' + steamid);
       res.redirect('/profile/' + steamid);
     })
 
@@ -134,8 +137,6 @@ app.get('/profile/:user', function(req, res) {
       });
     });
   }
-
-  console.log('-');
 });
 
 app.use(function(req, res) {
