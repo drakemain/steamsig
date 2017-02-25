@@ -9,12 +9,25 @@ var recentGameLogos = require('./parser').recentGameLogos;
 var steam = require('./steam');
 var SteamSigError = require('./error');
 
-exports.render = render;
-exports.update = update;
-exports.getCache = getCache;
-exports.getUserDirectory = getUserDirectory;
+exports.update = function(steamid) {
+  return shouldUpdate(steamid)
 
-function render(steamid) {
+  .then(function(shouldUpdateProfile) {
+    if (shouldUpdateProfile) {
+      return buildCache(steamid)
+
+      .then(function(userData) {
+        return Promise.join(saveCache(userData), draw(userData));
+      });
+    }
+  })
+
+  .then(function() {
+    return steamid;
+  });
+};
+
+function buildCache(steamid) {
   var steamAPIRequest = steam.buildRequest(
     "ISteamUser/GetPlayerSummaries/v0002"
     , steamid
@@ -58,32 +71,10 @@ function render(steamid) {
         userData.lastUpdated = new Date();
         userData.directory = userDir;
         userData.sigPath = path.join(userDir, "sig.png");
+
+        return userData;
       }
-    )
-
-    //cache data and render profile image
-    .then(function() {
-      cacheUserData(userData);
-      return draw(userData);
-    });
-  });
-}
-
-function update(steamid) {
-  return shouldUpdate(steamid)
-
-  .then(function(shouldUpdateProfile) {
-    if (shouldUpdateProfile) {
-      return render(steamid);
-
-      // .then(function(steamid) {
-      //   return path.join('assets', 'profiles', steamid, 'sig.png');
-      // });
-    }
-  })
-
-  .then(function() {
-    return path.join('assets', 'profiles', steamid, 'sig.png');
+    );
   });
 }
 
@@ -111,7 +102,7 @@ function shouldUpdate(steamid) {
   });
 }
 
-function cacheUserData(userData) {
+function saveCache(userData) {
   console.time('|>Cache user data');
   var filePath = path.join(userData.directory, 'userData.JSON');
   var userDataString = JSON.stringify(userData);

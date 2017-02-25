@@ -8,7 +8,6 @@ var bparse   = require('body-parser');
 var profile        = require('./src/profile');
 var SteamSigError = require('./src/error');
 var init = require('./src/initialize');
-var checkFileExists = require('./src/validate').checkFileExists;
 var validate = require('./src/validate');
 
 var app = express();
@@ -26,14 +25,14 @@ console.log("--App started listening on port", process.env.PORT + '.');
 
 app.get('/', function(req, res) {
   if (process.env.STEAM_KEY) {
-    res.redirect('/steam-id-form');
+    res.redirect('/profile');
   } else {
     res.send("No steam key has been set! A steam API Key" +
       " must be set before API calls can be made.");
   }
 });
 
-app.get('/steam-id-form/', function(req, res) {
+app.get('/profile', function(req, res) {
   res.render('form', {
     title: "Enter Steam ID",
     steamIDInputValue: req.query.steamid,
@@ -41,65 +40,35 @@ app.get('/steam-id-form/', function(req, res) {
   });
 });
 
-//will be more uselfull later...
-app.get('/form-handler', function(req, res) {
-  validate.checkForValidID(req.query.steamid)
+app.post('/profile', function(req, res) {
+  validate.checkForValidID(req.body.steamid)
+
+  .then(profile.update)
 
   .then(function(steamid) {
-    res.redirect('/profile/' + steamid);
+    res.redirect('profile/' + steamid);
   })
 
-  .catch(SteamSigError.Validation, function(err) {
-    console.error(err.message);
-    res.status(400).render('error', {
-      title: 'Validation Error',
-      message: err.clientMessage
-    });
-
-  })
-  .catch(SteamSigError.TimeOut, function(err) {
-    console.error(err.message);
-    res.status(504);
-
-    var idPos = err.uri.search('&steamids=') + 10;
-    var steamid = err.uri.substr(idPos, 17);
-
-    return checkFileExists(path.join('assets', 'profiles', steamid, 'sig.png'))
-    .then(function(filePath) {
-      console.log('Cached profile sent');
-      res.sendFile(path.resolve(filePath));
-    })
-    .catch(SteamSigError.FileDNE, function(err) {
-      console.error(err.message);
-      
-      res.render('error', {
-        title: 'Timeout Error',
-        message: "Steam isn't responding. " + err.clientMessage
-      });
-    });
-  })
   .catch(function(err) {
-    console.error("An unhandled error occured.");
-    console.trace(err.stack);
-
-    res.render('error', {
-      title: 'Error',
-      message: 'You\'ve destroyed everything!'
-    });
+    console.error(err);
   });
 });
 
 app.get('/profile/:user', function(req, res) {
-  console.log('-');
   if (validate.steamid(req.params.user)) {
-    profile.update(req.params.user)
+    var steamid = req.params.user;
+    var userDir = path.join('assets', 'profiles', steamid);
 
-    .then(validate.checkFileExists)
+    validate.checkFileExists(path.join(userDir, 'userData.JSON'))
 
-    .then(function(verifiedSigPath) {
-      console.log(verifiedSigPath);
+    .then(function() {
+      return profile.update(steamid);
+    })
 
-      var absoluteSigPath = path.resolve(verifiedSigPath);
+    .then(function() {
+      var sigPath = path.join(userDir, 'sig.png');
+
+      var absoluteSigPath = path.resolve(sigPath);
 
       console.time('|>Send file');
       res.status(200).type('png').sendFile(absoluteSigPath);
@@ -108,11 +77,8 @@ app.get('/profile/:user', function(req, res) {
 
     .catch(SteamSigError.FileDNE, function(err) {
       console.error(err.message);
-
-      res.render('error', {
-        title: 'Error',
-        message: err.clientMessage
-      });
+      console.log('Redirecting to new profile form..');
+      res.redirect('/profile?steamid=' + steamid);
     })
 
     .catch(function(err) {
@@ -139,6 +105,10 @@ app.get('/profile/:user', function(req, res) {
   }
 });
 
+// 404 handler
 app.use(function(req, res) {
-  res.status(404).send("Can't find requested page.");
+  res.status(404).render('error', {
+    title: 'Page Not Found',
+    message: 'The page you requested doesn\'t exist!'
+  });
 });
