@@ -3,6 +3,17 @@
 <p>
   <form action='/profile' method='post'>
     <p>
+
+      {{#if messages}}
+      <div name="messages" style="color: #0900C4; 12pt; border: 1px solid black;">
+        <ul>
+        {{#each messages}}
+          <li>{{this}}</li>
+        {{/each}}
+        </ul>
+      </div>
+      {{/if}}
+
       <div>
         Enter your Steam ID or custom name:<br>
         <input type='text' name='steamid' value="{{{steamIDInputValue}}}" autofocus><br>
