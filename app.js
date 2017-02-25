@@ -23,6 +23,11 @@ process.env.PORT = process.env.PORT || 3000;
 app.listen(process.env.PORT);
 console.log("--App started listening on port", process.env.PORT + '.');
 
+app.use(function(req, res, next) {
+  console.log('-');
+  next();
+});
+
 app.get('/', function(req, res) {
   if (process.env.STEAM_KEY) {
     res.redirect('/profile');
@@ -33,25 +38,54 @@ app.get('/', function(req, res) {
 });
 
 app.get('/profile', function(req, res) {
-  res.render('form', {
-    title: "Enter Steam ID",
-    steamIDInputValue: req.query.steamid,
-    elements: parsedElements
-  });
+  var formData = {
+    steamid: req.query.steamid
+  };
+
+  renderNewProfileForm(res, formData);
 });
 
 app.post('/profile', function(req, res) {
-  validate.checkForValidID(req.body.steamid)
+  if (!req.body.steamid) {
+    console.log('Steam ID field left empty.');
 
-  .then(profile.update)
+    var formData = {
+      messages: [
+        "Steam ID or name is required!"
+      ]
+    };
 
-  .then(function(steamid) {
-    res.redirect('profile/' + steamid);
-  })
+    renderNewProfileForm(res, formData);
 
-  .catch(function(err) {
-    console.error(err);
-  });
+  } else {
+
+    validate.checkForValidID(req.body.steamid)
+
+    .then(profile.update)
+
+    .then(function(steamid) {
+      res.redirect('profile/' + steamid);
+    })
+
+    .catch(SteamSigError.Validation, function(err) {
+      console.error(err.message);
+      
+      var formData = {
+        messages: [
+          "\"" + req.body.steamid + "\"" + " doesn't appear to be associated with a steam account."
+        ]
+      };
+
+      renderNewProfileForm(res, formData);
+    })
+
+    .catch(function(err) {
+      console.error('Unhandled POST error!');
+      console.error(err);
+    });
+  }
+
+  
 });
 
 app.get('/profile/:user', function(req, res) {
@@ -77,8 +111,17 @@ app.get('/profile/:user', function(req, res) {
 
     .catch(SteamSigError.FileDNE, function(err) {
       console.error(err.message);
-      console.log('Redirecting to new profile form..');
-      res.redirect('/profile?steamid=' + steamid);
+      console.log('Sending new profile form..');
+      
+      var formData = {
+        steamid: req.query.steamid,
+        messages: [
+          "You requested a profile which has not yet been created!",
+          "Create your profile here before requesting it."
+        ]
+      };
+
+      renderNewProfileForm(res, formData);
     })
 
     .catch(function(err) {
@@ -97,10 +140,15 @@ app.get('/profile/:user', function(req, res) {
 
     .catch(SteamSigError.Validation, function(err) {
       console.error(err.message);
-      res.status(400).render('error', {
-        title: 'Validation Error',
-        message: err.clientMessage
-      });
+
+      var formData = {
+        steamid: req.query.steamid,
+        messages: [
+          err.clientMessage
+        ]
+      };
+
+      renderNewProfileForm(res, formData);
     });
   }
 });
@@ -112,3 +160,12 @@ app.use(function(req, res) {
     message: 'The page you requested doesn\'t exist!'
   });
 });
+
+function renderNewProfileForm(res, formDataObj) {
+  res.render('form', {
+    title: "Enter Steam ID",
+    steamIDInputValue: formDataObj.steamid,
+    elements: parsedElements,
+    messages: formDataObj.messages
+  });
+}
