@@ -1,33 +1,80 @@
-var Promise  = require('bluebird');
-var path     = require('path');
-var fs       = Promise.promisifyAll(require("fs"));
+var Promise         = require('bluebird');
+var path            = require('path');
+var fs              = Promise.promisifyAll(require("fs"));
 
-var validate = require('./validate');
-var draw = require('./render');
-var parseGame = require('./parser').game;
+var validate        = require('./validate');
+var draw            = require('./render');
+var parseGame       = require('./parser').game;
 var recentGameLogos = require('./parser').recentGameLogos;
-var steam = require('./steam');
-var SteamSigError = require('./error');
+var steam           = require('./steam');
+var SteamSigError   = require('./error');
 
-exports.update = function(steamid) {
+exports.refresh = function(steamid) {
+  console.log('REFRESH');
+
   return shouldUpdate(steamid)
 
-  .then(function(shouldUpdateProfile) {
-    if (shouldUpdateProfile) {
-      return buildCache(steamid)
-
-      .then(function(userData) {
-        return Promise.join(saveCache(userData), draw(userData));
-      });
+  .then(function(shouldUpdate) {
+    if (shouldUpdate) {
+      return update(steamid);
     }
+  });
+}
+
+exports.setCanvas = function(steamid, canvasData) {
+  console.log('SET CANVAS');
+
+  var dataTemplate = getCanvasData();
+
+  for (var element in canvasData) {
+    dataTemplate.elements[element].active = true;
+  }
+
+  return getCache(steamid, 'canvas.JSON')
+
+  .then(function(cache) {
+    cache.canvas = dataTemplate;
+    return saveCache(steamid, 'canvas.JSON', cache);
   })
 
-  .then(function() {
-    return steamid;
-  });
-};
+  .catch(SteamSigError.FileDNE, function() {
+    var newCache = {};
+    newCache.canvas = dataTemplate;
 
-function buildCache(steamid) {
+    return saveCache(steamid, 'canvas.JSON', newCache);
+  });
+}
+
+exports.getDir = getDir = function(steamid) {
+  var relativePath = path.join('assets', 'profiles', steamid);
+
+  return path.resolve(relativePath);
+}
+
+
+
+// function update(steamid) {
+//   return Promise.join(getCache(steamid), buildSteamCache(steamid),
+//     function(refreshedSteamData, currentCache) {
+//       if (currentCache.steam = refreshedSteamData) {
+//         console.log('No changes to Steam data. Skipping update');
+//       } else {
+//         currentCache.steam = refreshedSteamData;
+//         return Promise.join(saveCache(steamid, currentCache), draw(currentCache))
+//       }
+//     }
+//   )
+
+//   .catch(SteamSigError.FileDNE, function() {
+//     return buildSteamCache(steamid)
+
+//     .then(function(steamData) {
+//       return saveCache(steamid, steamData);
+//     });
+//   });;
+// };
+
+function buildSteamCache(steamid) {
   var steamAPIRequest = steam.buildRequest(
     "ISteamUser/GetPlayerSummaries/v0002"
     , steamid
@@ -44,42 +91,44 @@ function buildCache(steamid) {
     } else {
       return Promise.reject(new SteamSigError.Validation());
     }
-    
   })
 
   .then(function(responseData) {
     var userData = {};
-    // this 'canvas' data will eventually be retrieved from a web form
-    userData.canvas = getCanvasData();
+
     userData.steam = responseData;
 
     return Promise.join(
       // resolve game ID into name, if available
       parseGame(userData.steam.gameid, 'gameName'),
       // get array of URLs for logos of recently played games
-      recentGameLogos(userData.steam.steamid),
-      getUserDirectory(userData.steam.steamid),
+      recentGameLogos(responseData.steamid),
+      getUserDirectory(responseData.steamid),
 
       function(game, recentGameLogos, userDir) {
         // processed Steam data
           // TODO: parse timecreated
           // TODO: parse personastate
-        userData.steam.currentGame = game;
-        userData.steam.recentGameLogos = recentGameLogos;
+        responseData.steamid.currentGame = game;
+        responseData.steamid.recentGameLogos = recentGameLogos;
 
         // additional user information
-        userData.lastUpdated = new Date();
-        userData.directory = userDir;
-        userData.sigPath = path.join(userDir, "sig.png");
+        responseData.lastUpdated = new Date();
+        responseData.directory = userDir;
+        responseData.sigPath = path.join(userDir, "sig.png");
 
-        return userData;
+        return responseData;
       }
     );
   });
 }
 
-function shouldUpdate(steamid) {
-  return getCache(steamid)
+function buildCanvasCache(canvasData) {
+  return getCanvasData();
+}
+
+exports.shouldUpdate = shouldUpdate = function(steamid) {
+  return getCache(steamid, 'steam.JSON')
 
   .then(function(cache) {
     var lastUpdated = new Date(cache.lastUpdated);
@@ -87,24 +136,42 @@ function shouldUpdate(steamid) {
     var secondsSinceProfileUpdate = Math.ceil((currentDate - lastUpdated) / 1000);
 
     if (secondsSinceProfileUpdate > 30) {
-      return true;
-    }
+      console.log('Fetching new Steam cache..');
 
-    console.log('Skipping profile update.. (' 
+      return buildSteamCache(steamid)
+
+      .then(function(refreshedCache) {
+        if (cache.steam && cache.steam === refreshedCache) {
+          console.log('No changes. Skipping refresh.');
+        } else {
+          console.log('Updating local cache..');
+          cache.steam = refreshedCache;
+          console.log(cache);
+          return Promise.join(saveCache(steamid, 'steam.JSON', cache), draw(cache));
+        }
+      });
+
+    } else {
+
+    console.log('--Skipping profile update.. (' 
       + secondsSinceProfileUpdate + 's since last update)');
-
-    return false;
+    }    
   })
 
   .catch(SteamSigError.FileDNE, function() {
-    console.log('Profile does not yet exist. Creating..');
-    return true;
+    return buildSteamCache(steamid)
+
+    .then(function(cache) {
+      saveCache(steamid, 'steam.JSON', cache);
+    });
   });
 }
 
-function saveCache(userData) {
+function saveCache(steamid, fileName, userData) {
+  //console.log(userData);
+
   console.time('|>Cache user data');
-  var filePath = path.join(userData.directory, 'userData.JSON');
+  var filePath = path.join(getDir(steamid), fileName);
   var userDataString = JSON.stringify(userData);
 
   return fs.writeFileAsync(filePath, userDataString).then(function() {
@@ -112,8 +179,8 @@ function saveCache(userData) {
   });
 }
 
-function getCache(steamid) {
-  var pathToCache = path.join('assets', 'profiles', steamid, 'userData.JSON');
+function getCache(steamid, fileName) {
+  var pathToCache = path.join('assets', 'profiles', steamid, fileName);
 
   return validate.checkFileExists(pathToCache)
   
@@ -143,8 +210,8 @@ function getCanvasData() {
   var thisCanvas = {};
 
   thisCanvas.elements = {
-    "avatar" : {"active" : true, "posX" : 8, "posY" : 8, "size" : "full"},
-    "recentGameLogos" : {"active" : true, 
+    "avatar" : {"active" : false, "posX" : 8, "posY" : 8, "size" : "full"},
+    "recentGameLogos" : {"active" : false, 
       "logos" : [
         {"posX" : 208, "posY" : 133, "scale" : .72},
         {"posX" : 350, "posY" : 133, "scale" : .72}
@@ -152,9 +219,9 @@ function getCanvasData() {
     },
 
     "steamid" : {"active" : false},
-    "personaname" : {"active" : true, "posX" : 208, "posY" : 32,
+    "personaname" : {"active" : false, "posX" : 208, "posY" : 32,
                       "font" : "Helvetica", "size" : "20px"},
-    "age" : {"active" : true, "posX" : 415, "posY" : 32,
+    "age" : {"active" : false, "posX" : 415, "posY" : 32,
               "font" : "Helvetica", "size" : "14px"}
   };
 

@@ -30,8 +30,7 @@ module.exports = function(userInfo) {
 
   return Promise.join(
     placeImageByURL(userInfo.steam.avatarfull
-      , userInfo.canvas.elements.avatar.posX
-      , userInfo.canvas.elements.avatar.posY),
+      , userInfo.canvas.elements.avatar),
     placeImageByURL(userInfo.steam.recentGameLogos[0]
       , userInfo.canvas.elements.recentGameLogos.logos[0].posX
       , userInfo.canvas.elements.recentGameLogos.logos[0].posY
@@ -100,10 +99,12 @@ function fillCanvas(color) {
   sig.restore();
 }
 
-function placeImageByURL(imgURL, x, y, scale) {
-  if (!imgURL) {return;}
+function placeImageByURL(imgURL, placementData) {
+  console.log(placementData);
 
-  scale = scale || 1;
+  if (!imgURL || !placementData.active) {return;}
+
+  var scale = placementData.scale || 1;
 
   return request.get({url: imgURL, encoding: null})
     .then(function(body) {
@@ -121,7 +122,7 @@ function placeImageByURL(imgURL, x, y, scale) {
       var height = Math.floor(img.height * scale);
       var width = Math.floor(img.width * scale);
 
-      sig.drawImage(img, x, y, width, height);
+      sig.drawImage(img, placementData.posX, placementData.posY, width, height);
 
       sig.restore();
     };

@@ -1,14 +1,14 @@
 require('dotenv').config({path: './config/.env', silent: true});
 
-var path     = require('path');
-var express  = require('express');
-var hbars    = require('express-handlebars');
-var bparse   = require('body-parser');
+var path          = require('path');
+var express       = require('express');
+var hbars         = require('express-handlebars');
+var bparse        = require('body-parser');
 
-var profile        = require('./src/profile');
+var profile       = require('./src/profile');
 var SteamSigError = require('./src/error');
-var init = require('./src/initialize');
-var validate = require('./src/validate');
+var init          = require('./src/initialize');
+var validate      = require('./src/validate');
 
 var app = express();
 app.use(bparse.json());
@@ -16,25 +16,27 @@ app.use(bparse.urlencoded({ extended: true }));
 app.engine('handlebars', hbars({defaultLayout: 'main'}));
 app.set('view engine', 'handlebars');
 
-var parsedElements = require('./assets/JSON/elements');
+var parsedProfileElements = require('./assets/JSON/elements');
 
 init();
 process.env.PORT = process.env.PORT || 3000;
 app.listen(process.env.PORT);
 console.log("--App started listening on port", process.env.PORT + '.');
 
+// Don't execute any routes unless there is a steam key.
 app.use(function(req, res, next) {
-  console.log('-');
-  next();
+  if (!process.env.STEAM_KEY) {
+    res.render('error', {
+      message: 'Steamsig is currently down.'
+    });
+  } else {
+    console.log('-');
+    next();
+  }  
 });
 
 app.get('/', function(req, res) {
-  if (process.env.STEAM_KEY) {
-    res.redirect('/profile');
-  } else {
-    res.send("No steam key has been set! A steam API Key" +
-      " must be set before API calls can be made.");
-  }
+  res.redirect('/profile');
 });
 
 app.get('/profile', function(req, res) {
@@ -61,10 +63,17 @@ app.post('/profile', function(req, res) {
 
     validate.checkForValidID(req.body.steamid)
 
-    .then(profile.update)
+    .then(function(validSteamID) {
+      profile.shouldUpdate(validSteamID)
 
-    .then(function(steamid) {
-      res.redirect('profile/' + steamid);
+      .then(function() {
+        delete req.body.steamid;
+        profile.setCanvas(validSteamID, req.body);
+      })
+
+      .then(function() {
+        res.redirect('/profile/' + validSteamID);
+      });
     })
 
     .catch(SteamSigError.Validation, function(err) {
@@ -82,30 +91,29 @@ app.post('/profile', function(req, res) {
     .catch(function(err) {
       console.error('Unhandled POST error!');
       console.error(err);
+
+      res.render('error', {
+        title: 'Error',
+        message: 'Something went wrong. :('
+      });
     });
   }
-
-  
 });
 
 app.get('/profile/:user', function(req, res) {
   if (validate.steamid(req.params.user)) {
     var steamid = req.params.user;
-    var userDir = path.join('assets', 'profiles', steamid);
+    var userDir = profile.getDir(steamid);
 
     validate.checkFileExists(path.join(userDir, 'userData.JSON'))
 
     .then(function() {
-      return profile.update(steamid);
+      return profile.shouldUpdate(steamid);
     })
 
     .then(function() {
-      var sigPath = path.join(userDir, 'sig.png');
-
-      var absoluteSigPath = path.resolve(sigPath);
-
       console.time('|>Send file');
-      res.status(200).type('png').sendFile(absoluteSigPath);
+      res.status(200).type('png').sendFile(path.join(userDir, 'sig.png'));
       console.timeEnd('|>Send file');
     })
 
@@ -114,7 +122,7 @@ app.get('/profile/:user', function(req, res) {
       console.log('Sending new profile form..');
       
       var formData = {
-        steamid: req.query.steamid,
+        steamid: steamid,
         messages: [
           "You requested a profile which has not yet been created!",
           "Create your profile here before requesting it."
@@ -165,7 +173,7 @@ function renderNewProfileForm(res, formDataObj) {
   res.render('form', {
     title: "Enter Steam ID",
     steamIDInputValue: formDataObj.steamid,
-    elements: parsedElements,
+    elements: parsedProfileElements,
     messages: formDataObj.messages
   });
 }
