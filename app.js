@@ -48,6 +48,8 @@ app.get('/profile', function(req, res) {
 });
 
 app.post('/profile', function(req, res) {
+  console.log('Form profile request:', req.body.steamid);
+
   if (!req.body.steamid) {
     console.log('Steam ID field left empty.');
 
@@ -60,15 +62,17 @@ app.post('/profile', function(req, res) {
     renderNewProfileForm(res, formData);
 
   } else {
+    var canvasData = req.body;
 
     validate.checkForValidID(req.body.steamid)
 
     .then(function(validSteamID) {
-      profile.shouldUpdate(validSteamID)
+      canvasData.steamid = validSteamID;
+
+      return profile.setCanvas(canvasData)
 
       .then(function() {
-        delete req.body.steamid;
-        profile.setCanvas(validSteamID, req.body);
+        return profile.refresh(validSteamID);
       })
 
       .then(function() {
@@ -101,14 +105,16 @@ app.post('/profile', function(req, res) {
 });
 
 app.get('/profile/:user', function(req, res) {
+  console.log('Direct profile request:', req.params.user);
+
   if (validate.steamid(req.params.user)) {
     var steamid = req.params.user;
-    var userDir = profile.getDir(steamid);
+    var userDir = path.resolve(profile.getDir(steamid));
 
-    validate.checkFileExists(path.join(userDir, 'userData.JSON'))
+    validate.checkFileExists(path.join(userDir, 'canvas.JSON'))
 
     .then(function() {
-      return profile.shouldUpdate(steamid);
+      return profile.refresh(steamid);
     })
 
     .then(function() {

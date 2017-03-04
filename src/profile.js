@@ -8,73 +8,153 @@ var parseGame       = require('./parser').game;
 var recentGameLogos = require('./parser').recentGameLogos;
 var steam           = require('./steam');
 var SteamSigError   = require('./error');
+var _               = require('lodash');
+
+exports.cache = getCache;
 
 exports.refresh = function(steamid) {
-  console.log('REFRESH');
+  return getCache(steamid)
 
-  return shouldUpdate(steamid)
+  .then(function(localCache) {
+    if (isExpired(localCache.lastUpdated)) {
+      return updateProfile(steamid);
+    } else {
+      console.log('skip refresh');
+    }
+  })
 
-  .then(function(shouldUpdate) {
-    if (shouldUpdate) {
-      return update(steamid);
+  .catch(SteamSigError.FileDNE, function(err) {
+    var userDir = this.getDir(steamid);
+    var steamCache = path.join(userDir, 'steam.JSON');
+
+    console.log('Caught File DNE', err.filePath);
+
+    if (err.filePath === steamCache) {
+      console.log('Creating new local steam cache');
+      return newSteamCache(steamid);
+    } else {
+      throw err;
     }
   });
-}
+};
 
-exports.setCanvas = function(steamid, canvasData) {
-  console.log('SET CANVAS');
-
+exports.setCanvas = function(canvasData) {
+  console.log('[SET CANVAS]');
+  // temporary until web form can generate all canvas data
   var dataTemplate = getCanvasData();
+  var steamid = canvasData.steamid;
+  delete canvasData.steamid;
+  if (canvasData.recentGameLogos) {
+    // Will be able to build an array
+    // Won't be limited to 2
+    canvasData.recentGameLogo1 = {'active' : true};
+    canvasData.recentGameLogo2 = {'active' : true};
+  }
+  delete canvasData.recentGameLogos;
 
   for (var element in canvasData) {
     dataTemplate.elements[element].active = true;
   }
 
-  return getCache(steamid, 'canvas.JSON')
+  return getCacheFile(steamid, 'canvas.JSON')
 
   .then(function(cache) {
-    cache.canvas = dataTemplate;
-    return saveCache(steamid, 'canvas.JSON', cache);
+    cache = dataTemplate;
+
+    return saveCache(steamid, 'canvas.JSON', cache)
+
+    .then(function() {
+      console.log('[/SET CANVAS]');
+    });
   })
 
   .catch(SteamSigError.FileDNE, function() {
+    console.log('Creating new Canvas.');
     var newCache = {};
-    newCache.canvas = dataTemplate;
+    newCache = dataTemplate;
+    return saveCache(steamid, 'canvas.JSON', newCache)  
 
-    return saveCache(steamid, 'canvas.JSON', newCache);
+    .then(function() {
+      console.log('[/SET CANVAS]');
+    });
   });
-}
+};
 
 exports.getDir = getDir = function(steamid) {
-  var relativePath = path.join('assets', 'profiles', steamid);
+  return path.join('assets', 'profiles', steamid);
+};
 
-  return path.resolve(relativePath);
+function newSteamCache(steamid) {
+  console.log('[NEW STEAM CACHE]');
+  return Promise.join(buildSteamCache(steamid), getCacheFile(steamid, 'canvas.JSON'),
+    function(newSteamCache, canvasData) {
+      var userData = {};
+      userData = newSteamCache;
+      userData.canvas = canvasData;
+
+      return Promise.join(saveCache(steamid, 'steam.JSON', newSteamCache), draw(userData), 
+        function() {console.log('[/NEW STEAM CACHE]');}
+      );
+    }
+  );
 }
 
+function updateProfile(steamid) {
+  console.log('[UPDATE PROFILE]');
 
+  return Promise.join(getCache(steamid), buildSteamCache(steamid),
+    function(localCache, refreshedSteamCache) {
+      if (_.isEqual(localCache.steam, refreshedSteamCache.steam)) {
+        console.log('No changes to update. Skipping render.');
+        return saveCache(steamid, 'steam.JSON', refreshedSteamCache)
 
-// function update(steamid) {
-//   return Promise.join(getCache(steamid), buildSteamCache(steamid),
-//     function(refreshedSteamData, currentCache) {
-//       if (currentCache.steam = refreshedSteamData) {
-//         console.log('No changes to Steam data. Skipping update');
-//       } else {
-//         currentCache.steam = refreshedSteamData;
-//         return Promise.join(saveCache(steamid, currentCache), draw(currentCache))
-//       }
-//     }
-//   )
+        .then(function(){console.log('[/UPDATE PROFILE]');});
 
-//   .catch(SteamSigError.FileDNE, function() {
-//     return buildSteamCache(steamid)
+      } else {
+        console.log('Found changes. Re-rendering profile');
 
-//     .then(function(steamData) {
-//       return saveCache(steamid, steamData);
-//     });
-//   });;
-// };
+        var newCache = {};
+        newCache = refreshedSteamCache;
+        newCache.canvas = localCache.canvas;
+
+        return Promise.join(saveCache(steamid, 'steam.JSON', refreshedSteamCache), draw(newCache)
+          , function() {
+
+            console.log('[/UPDATE PROFILE]');
+            // return saveCache(steamid, 'old.JSON', localCache.steam)
+
+            // .then(saveCache(steamid, 'new.JSON', refreshedSteamCache.steam));
+          }
+        );
+      }
+    }
+  );
+}
+
+function isExpired(lastUpdateDate) {
+  var expireThreshhold = 10;
+  var lastUpdated = new Date(lastUpdateDate);
+  var currentDate = new Date();
+  var secondsSinceProfileUpdate = Math.ceil((currentDate - lastUpdated) / 1000);
+
+  if (secondsSinceProfileUpdate > expireThreshhold) {
+    console.log('Local Steam cache expired. (' 
+      + secondsSinceProfileUpdate + 's/' + expireThreshhold
+      + 's since update.)');
+
+    return true;
+  } else {
+    console.log('Local Steam Cache has not expired. (' 
+      + secondsSinceProfileUpdate + 's/' + expireThreshhold
+      + 's since update.)');
+
+    return false;
+  }
+}
 
 function buildSteamCache(steamid) {
+  console.log('[BUILD STEAM DATA]');
+
   var steamAPIRequest = steam.buildRequest(
     "ISteamUser/GetPlayerSummaries/v0002"
     , steamid
@@ -102,84 +182,50 @@ function buildSteamCache(steamid) {
       // resolve game ID into name, if available
       parseGame(userData.steam.gameid, 'gameName'),
       // get array of URLs for logos of recently played games
-      recentGameLogos(responseData.steamid),
-      getUserDirectory(responseData.steamid),
+      recentGameLogos(userData.steam.steamid),
+      getUserDirectory(userData.steam.steamid),
 
       function(game, recentGameLogos, userDir) {
         // processed Steam data
           // TODO: parse timecreated
           // TODO: parse personastate
-        responseData.steamid.currentGame = game;
-        responseData.steamid.recentGameLogos = recentGameLogos;
+        userData.steam.currentGame = game;
+        userData.steam.recentGameLogo1 = recentGameLogos[0];
+        userData.steam.recentGameLogo2 = recentGameLogos[1];
 
         // additional user information
-        responseData.lastUpdated = new Date();
-        responseData.directory = userDir;
-        responseData.sigPath = path.join(userDir, "sig.png");
+        userData.lastUpdated = new Date();
+        userData.directory = userDir;
+        userData.sigPath = path.join(userDir, "sig.png");
 
-        return responseData;
+        console.log('[/BUILD STEAM DATA]');
+        return userData;
       }
     );
   });
 }
 
-function buildCanvasCache(canvasData) {
-  return getCanvasData();
-}
-
-exports.shouldUpdate = shouldUpdate = function(steamid) {
-  return getCache(steamid, 'steam.JSON')
-
-  .then(function(cache) {
-    var lastUpdated = new Date(cache.lastUpdated);
-    var currentDate = new Date();
-    var secondsSinceProfileUpdate = Math.ceil((currentDate - lastUpdated) / 1000);
-
-    if (secondsSinceProfileUpdate > 30) {
-      console.log('Fetching new Steam cache..');
-
-      return buildSteamCache(steamid)
-
-      .then(function(refreshedCache) {
-        if (cache.steam && cache.steam === refreshedCache) {
-          console.log('No changes. Skipping refresh.');
-        } else {
-          console.log('Updating local cache..');
-          cache.steam = refreshedCache;
-          console.log(cache);
-          return Promise.join(saveCache(steamid, 'steam.JSON', cache), draw(cache));
-        }
-      });
-
-    } else {
-
-    console.log('--Skipping profile update.. (' 
-      + secondsSinceProfileUpdate + 's since last update)');
-    }    
-  })
-
-  .catch(SteamSigError.FileDNE, function() {
-    return buildSteamCache(steamid)
-
-    .then(function(cache) {
-      saveCache(steamid, 'steam.JSON', cache);
-    });
-  });
-}
-
-function saveCache(steamid, fileName, userData) {
-  //console.log(userData);
-
+function saveCache(steamid, cacheLabel, data) {
   console.time('|>Cache user data');
-  var filePath = path.join(getDir(steamid), fileName);
-  var userDataString = JSON.stringify(userData);
+  var dataString = JSON.stringify(data);
 
-  return fs.writeFileAsync(filePath, userDataString).then(function() {
-    console.timeEnd('|>Cache user data');
-  });
+  return getUserDirectory(steamid)
+
+  .then(function(userDir) {
+    var saveLocation = path.join(userDir, cacheLabel);
+
+    return fs.writeFileAsync(saveLocation, dataString)
+
+    .then(function() {
+      console.log('SAVE:', saveLocation);
+      console.timeEnd('|>Cache user data');
+    });
+  });  
 }
 
-function getCache(steamid, fileName) {
+function getCacheFile(steamid, fileName) {
+  console.log('GET:', steamid, fileName);
+
   var pathToCache = path.join('assets', 'profiles', steamid, fileName);
 
   return validate.checkFileExists(pathToCache)
@@ -189,12 +235,28 @@ function getCache(steamid, fileName) {
   .then(JSON.parse);
 }
 
+function getCache(steamid) {
+  return Promise.join(getCacheFile(steamid, 'canvas.JSON')
+    , getCacheFile(steamid, 'steam.JSON')
+    , function(canvasData, steamData) {
+      var cache = {};
+
+      cache.canvas = canvasData;
+      cache = steamData;
+
+      return Promise.resolve(cache);
+    }
+  );
+}
+
 function getUserDirectory(steamid) {
   var userDir = path.join('assets', 'profiles', steamid);
 
   return new Promise(function (resolve) {
+
     fs.stat(userDir, function(err, stats) {
       if (!stats) {
+        console.log('Creating new user directory');
 
         fs.mkdir(userDir, function() {
           resolve(userDir);
@@ -211,12 +273,10 @@ function getCanvasData() {
 
   thisCanvas.elements = {
     "avatar" : {"active" : false, "posX" : 8, "posY" : 8, "size" : "full"},
-    "recentGameLogos" : {"active" : false, 
-      "logos" : [
-        {"posX" : 208, "posY" : 133, "scale" : .72},
-        {"posX" : 350, "posY" : 133, "scale" : .72}
-      ]
-    },
+
+
+    "recentGameLogo1" : {"active" : false, "posX" : 208, "posY" : 133, "scale" : .72},
+    "recentGameLogo2" : {"active" : false, "posX" : 350, "posY" : 133, "scale" : .72},
 
     "steamid" : {"active" : false},
     "personaname" : {"active" : false, "posX" : 208, "posY" : 32,

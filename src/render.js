@@ -24,21 +24,17 @@ module.exports = function(userInfo) {
   drawTextElement(userInfo.steam.personaname, userInfo.canvas.elements.personaname);
   drawTextElement("User for\n" + parse.timecreated(userInfo.steam.timecreated).age
     , userInfo.canvas.elements.age);
-  drawText("steamsig.drakemain.com V0.8.1a", "Arial", "8px", 8, 198);
+  drawText("steamsig.drakemain.com V0.9.0a", "Arial", "8px", 8, 198);
 
   writeStatus(userInfo.steam);
 
   return Promise.join(
     placeImageByURL(userInfo.steam.avatarfull
       , userInfo.canvas.elements.avatar),
-    placeImageByURL(userInfo.steam.recentGameLogos[0]
-      , userInfo.canvas.elements.recentGameLogos.logos[0].posX
-      , userInfo.canvas.elements.recentGameLogos.logos[0].posY
-      , userInfo.canvas.elements.recentGameLogos.logos[0].scale),
-    placeImageByURL(userInfo.steam.recentGameLogos[1]
-      , userInfo.canvas.elements.recentGameLogos.logos[1].posX
-      , userInfo.canvas.elements.recentGameLogos.logos[1].posY
-      , userInfo.canvas.elements.recentGameLogos.logos[1].scale),
+    placeImageByURL(userInfo.steam.recentGameLogo1
+      , userInfo.canvas.elements.recentGameLogo1),
+    placeImageByURL(userInfo.steam.recentGameLogo2
+      , userInfo.canvas.elements.recentGameLogo2),
 
     function() {
       return new Promise(function(resolve) {
@@ -100,7 +96,6 @@ function fillCanvas(color) {
 }
 
 function placeImageByURL(imgURL, placementData) {
-  console.log(placementData);
 
   if (!imgURL || !placementData.active) {return;}
 

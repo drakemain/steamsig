@@ -42,7 +42,7 @@ var buildRequest = exports.buildRequest = function(method, ID) {
 };
 
 exports.resolveVanityName = function(name) {
-  console.time('|>Resolving vanity name: ' + name);
+  console.time('|>Resolve vanity name');
   var apiRequest = buildRequest(
     "ISteamUser/ResolveVanityURL/v0001"
     , name
@@ -51,10 +51,12 @@ exports.resolveVanityName = function(name) {
   return call(apiRequest)
 
   .then(function(resolvedRequest) {
-    console.timeEnd('|>Resolving vanity name: ' + name);
+    console.timeEnd('|>Resolve vanity name');
     if (resolvedRequest.response.steamid) {
+      console.log('Resolved', name, 'to', resolvedRequest.response.steamid + '.');
       return resolvedRequest.response.steamid;
     } else {
+      console.log('Failed to resolve', name, 'to a valid Steam ID.');
       throw new SteamSigError.Validation;
     }
   });
