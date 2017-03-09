@@ -72,10 +72,6 @@ app.post('/profile', function(req, res) {
       return profile.setCanvas(canvasData)
 
       .then(function() {
-        return profile.refresh(validSteamID);
-      })
-
-      .then(function() {
         res.redirect('/profile/' + validSteamID);
       });
     })

@@ -24,9 +24,8 @@ exports.refresh = function(_steamid) {
       return buildSteamCache()
 
       .then(function(refreshedSteamCache) {
-        console.log('Found changes. Rendering profile.');
-
         if (_.isEqual(refreshedSteamCache.steam, localCache.steam)) {
+          console.log('Found changes. Rendering profile.');
           return updateSteamProfile(refreshedSteamCache);
         } else {
           console.log('No changes. Skipping profile render.');
@@ -61,7 +60,11 @@ exports.setCanvas = function(canvasData) {
 
   var compiledCanvasData = compileCanvasData(canvasData);
 
-  return saveCache('canvas.JSON', compiledCanvasData)
+  return Promise.join(buildSteamCache(), saveCache('canvas.JSON', compiledCanvasData),
+    function(newSteamCache) {
+      return updateSteamProfile(newSteamCache);
+    }
+  )
 
   .then(function() {
     console.log('[/SET CANVAS]');
