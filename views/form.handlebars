@@ -24,7 +24,6 @@
       
       <div>
         Customization Options:<br>
-        (these don't work yet)<br>
         {{#each elements}}
           {{this}}: <input type='checkbox' name='{{@key}}' checked='true'> |
         {{/each}}
@@ -36,7 +35,9 @@
     Keep in mind that this is a work in progress!<br>
 
     <ul>Updates:
-      <li>February 17, 2017: Profiles can only update once every 30 seconds. Render error pages instead of sending text.
+      <li>March 8, 2017: Optimizations, refactoring, and toggleable
+      sig elements! Technically most customization options are currently possible (like background color, image size, and element placement). All that is needed is the ability to collect that data from the web form and pass it into my renderer. Work in progress!</li> 
+      <li>February 17, 2017: Profiles can only update once every 10 seconds. Render error pages instead of sending text.
       <li>December 13, 2016: Some behind the scenes changes to prep for customization</li>
       <li>November 4, 2016: Brand new renderer using Canvas!</li>
       <li>October 22, 2016: Throw validation error when input matches

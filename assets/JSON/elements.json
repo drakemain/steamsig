@@ -2,5 +2,7 @@
   "personaname": "Profile Name",
   "recentGameLogos": "Recently Played Games",
   "avatar": "Avatar",
-  "age": "Profile Age"
+  "age": "Profile Age",
+  "status" : "Status",
+  "_steamid" : "Steam ID"
 }

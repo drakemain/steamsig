@@ -77,7 +77,14 @@ exports.getDir = function(_steamid) {
 
 function compileCanvasData(data) {
   var dataTemplate = getCanvasData();
-  delete data.steamid;
+
+  if (data._steamid) {
+    data.steamid = data._steamid;
+    delete data._steamid;
+  } else {
+    delete data.steamid;
+  }
+  
   if (data.recentGameLogos) {
     // Will be able to build an array
     // Won't be limited to 2
@@ -258,11 +265,15 @@ function getCanvasData() {
     "recentGameLogo1" : {"active" : false, "posX" : 208, "posY" : 133, "scale" : .72},
     "recentGameLogo2" : {"active" : false, "posX" : 350, "posY" : 133, "scale" : .72},
 
-    "steamid" : {"active" : false},
+    "steamid" : {"active" : false, "posX": 216, "posY": 67,
+                 "font": "Helvetica", "size": "14px"},
     "personaname" : {"active" : false, "posX" : 208, "posY" : 32,
                       "font" : "Helvetica", "size" : "20px"},
     "age" : {"active" : false, "posX" : 415, "posY" : 32,
-              "font" : "Helvetica", "size" : "14px"}
+              "font" : "Helvetica", "size" : "14px"},
+
+    "status" : {"active" : false, "posX" : 216, "posY": 53,
+                "font": "Helvetica", "size": "14px"}
   };
 
 

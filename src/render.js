@@ -10,7 +10,11 @@ var Image = Canvas.Image;
 var canvas = new Canvas();
 var sig = canvas.getContext('2d');
 
-module.exports = function(userInfo) {
+var userInfo = {};
+
+module.exports = function(_userInfo) {
+  userInfo = _userInfo;
+
   console.time('|>Render');
 
   canvas.height = userInfo.canvas.size.height; 
@@ -24,7 +28,8 @@ module.exports = function(userInfo) {
   drawTextElement(userInfo.steam.personaname, userInfo.canvas.elements.personaname);
   drawTextElement("User for\n" + parse.timecreated(userInfo.steam.timecreated).age
     , userInfo.canvas.elements.age);
-  drawText("steamsig.drakemain.com V0.9.0a", "Arial", "8px", 8, 198);
+  drawTextElement(userInfo.steam.steamid, userInfo.canvas.elements.steamid);
+  drawTextElement("steamsig.drakemain.com V0.10.1a", {"active": true,"font":"Arial", "size":"8px", "posX":8, "posY":198});
 
   writeStatus(userInfo.steam);
 
@@ -62,6 +67,8 @@ module.exports = function(userInfo) {
 };
 
 function drawTextElement(text, properties) {
+  if (!properties.active) {return;}
+
   var thisFont = properties.size + " " + properties.font;
   
   sig.save();
@@ -71,21 +78,23 @@ function drawTextElement(text, properties) {
 }
 
 
-function writeStatus(userSteamData) {
+function writeStatus() {
+  if (!userInfo.canvas.elements.status.active) {return;}
+
   var status = "";
 
-  if (userSteamData.gameid) {
+  if (userInfo.steam.gameid) {
     status = "In-Game";
 
-    if (userSteamData.currentGame) {
-      status += ": " + userSteamData.currentGame;
+    if (userInfo.steam.currentGame) {
+      status += ": " + userInfo.steam.currentGame;
     }
 
   } else {
-    status = parse.personastate(userSteamData.personastate);
+    status = parse.personastate(userInfo.steam.personastate);
   }
 
-  drawText(status, "Helvetica", "14px", 216, 53);
+  drawTextElement(status, userInfo.canvas.elements.status);
 }
 
 function fillCanvas(color) {
@@ -126,14 +135,14 @@ function placeImageByURL(imgURL, placementData) {
   });
 }
 
-function drawText(text, font, size, x, y) {
-  var thisFont = size + " " + font;
+// function drawText(text, font, size, x, y) {
+//   var thisFont = size + " " + font;
   
-  sig.save();
-  sig.font = thisFont;
-  sig.fillText(text, x, y);
-  sig.restore();
-}
+//   sig.save();
+//   sig.font = thisFont;
+//   sig.fillText(text, x, y);
+//   sig.restore();
+// }
 
 // function placeImageByURL(imgURL, x, y, scale) {
 //   return request.get({url: imgURL, encoding: null})
