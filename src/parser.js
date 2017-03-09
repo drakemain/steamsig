@@ -63,7 +63,7 @@ exports.recentGameLogos = function(steamid, count, type) {
   .then(function(recentGames) {
     recentGames = recentGames.response;
 
-    if (!recentGames.total_count || recentGames.total_count === 0 || recentGames.total_count === 1) {
+    if (!recentGames.total_count || recentGames.total_count === 0) {
       return false;
     } else {
       recentGames = recentGames.games;
@@ -72,9 +72,11 @@ exports.recentGameLogos = function(steamid, count, type) {
     var gameLogos = [];
 
     for (var i = 0; i < recentGames.length; i++) {
-      gameLogos[i] = "http://media.steampowered.com/steamcommunity/public" +
+      if (recentGames[i][type]) {
+        gameLogos[i] = "http://media.steampowered.com/steamcommunity/public" +
         "/images/apps/" + recentGames[i].appid + '/' + recentGames[i][type] +
         ".jpg";
+      }
     }
 
     return Promise.resolve(gameLogos);

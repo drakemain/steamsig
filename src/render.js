@@ -41,8 +41,8 @@ module.exports = function(_userInfo) {
     placeImageByURL(userInfo.steam.recentGameLogo2
       , userInfo.canvas.elements.recentGameLogo2),
 
-    function() {
-      return new Promise(function(resolve) {
+  function() {
+    return new Promise(function(resolve, reject) {
       var out = fs.createWriteStream(userInfo.directory + '/sig.png');
       var imgStream = canvas.pngStream();
       // var buffer = canvas.toBuffer();
@@ -53,7 +53,7 @@ module.exports = function(_userInfo) {
       });
 
       imgStream.on('error', function(err) {
-        throw err;
+        reject(err);
       });
 
       imgStream.on('end', function() {
@@ -105,7 +105,6 @@ function fillCanvas(color) {
 }
 
 function placeImageByURL(imgURL, placementData) {
-
   if (!imgURL || !placementData.active) {return;}
 
   var scale = placementData.scale || 1;

@@ -24,7 +24,7 @@ exports.refresh = function(_steamid) {
       return buildSteamCache()
 
       .then(function(refreshedSteamCache) {
-        if (_.isEqual(refreshedSteamCache.steam, localCache.steam)) {
+        if (!_.isEqual(refreshedSteamCache.steam, localCache.steam)) {
           console.log('Found changes. Rendering profile.');
           return updateSteamProfile(refreshedSteamCache);
         } else {
@@ -112,7 +112,11 @@ function updateSteamProfile(steamData) {
     return Promise.join(
       saveCache('steam.JSON', steamData),
       draw(compiledProfileData)
-    );
+    )
+
+    .then(function() {
+      console.log('[/UPDATE PROFILE]');
+    });
   });
 }
 
@@ -191,6 +195,7 @@ function buildSteamCache() {
 }
 
 function saveCache(cacheLabel, data) {
+  console.log('[SAVE CACHE]');
   console.time('|>Cache user data');
   var dataString = JSON.stringify(data);
 
@@ -204,12 +209,14 @@ function saveCache(cacheLabel, data) {
     .then(function() {
       console.log('SAVE:', saveLocation);
       console.timeEnd('|>Cache user data');
+      console.log('[/SAVE CACHE]');
     });
   });  
 }
 
 function getCacheFile(fileName) {
-  console.log('GET:', steamid, fileName);
+  console.log('[GET CACHE FILE]');
+  console.log(steamid, fileName);
 
   var pathToCache = path.join('assets', 'profiles', steamid, fileName);
 
@@ -217,7 +224,11 @@ function getCacheFile(fileName) {
   
   .then(fs.readFileAsync)
 
-  .then(JSON.parse);
+  .then(JSON.parse)
+
+  .tap(function() {
+    console.log('[/GET CACHE FILE]');
+  });
 }
 
 function getCache() {
@@ -233,7 +244,11 @@ function getCache() {
 
       return Promise.resolve(cache);
     }
-  );
+  )
+
+  .tap(function() {
+    console.log('[/GET CACHE]');
+  });
 }
 
 function getUserDirectory() {
