@@ -32,6 +32,21 @@ exports.refresh = function(_steamid) {
         }
       });
     }
+
+    // if for some reason the png file is deleted and profile didn't need to update
+    return getUserDirectory()
+
+    .then(function(dir) {
+      var sigPath = path.join(dir, 'sig.png');
+      return validate.checkFileExists(sigPath)
+
+      .catch(SteamSigError.FileDNE, function() {
+        console.log('Sig was deleted! Re-rendering..');
+        return getCacheFile('steam.JSON')
+
+        .then(updateSteamProfile);
+      });
+    });
   })
 
   .catch(SteamSigError.FileDNE, function(err) {
@@ -120,8 +135,14 @@ function updateSteamProfile(steamData) {
   });
 }
 
+function renderFromCache() {
+  return getCache()
+
+  .then(draw);
+}
+
 function isExpired(lastUpdateTimestamp) {
-  var expireThreshhold = 10;
+  const expireThreshhold = process.env.STEAM_CACHE_EXPIRE_SECONDS;
   var lastUpdated = new Date(lastUpdateTimestamp);
   var currentDate = new Date();
   var secondsSinceProfileUpdate = Math.ceil((currentDate - lastUpdated) / 1000);
