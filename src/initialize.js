@@ -7,13 +7,15 @@ module.exports = function(){
   return checkDirExists(path.join('assets', 'profiles'))
   .then(checkDirExists('config'))
   .then(steamKeyCheck)
+  .then(setSteamWaitTime)
+  .then(setSteamCacheExpireTime)
   .then(function() {
     console.log("Ready.\n");
   });
 };
 
 //ensures STEAM_KEY has been set, otherwise prompts for STEAM_KEY
-var steamKeyCheck = function() {
+function steamKeyCheck() {
   if (!process.env.STEAM_KEY) {
     return makeSteamKey()
     .then(function(key) {
@@ -21,10 +23,26 @@ var steamKeyCheck = function() {
       console.log("Your key has been set for this session.");
     });
   }
-};
+}
+
+function setSteamWaitTime() {
+  if (!process.env.STEAM_WAIT) {
+    process.env.STEAM_WAIT = 6000;
+  }
+
+  console.log('Steam API timeout time is', process.env.STEAM_WAIT + 'ms.');
+}
+
+function setSteamCacheExpireTime() {
+  if (!process.env.STEAM_CACHE_EXPIRE_SECONDS) {
+    process.env.STEAM_CACHE_EXPIRE_SECONDS = 30;
+  }
+
+  console.log('Steam cache expire time is', process.env.STEAM_CACHE_EXPIRE_SECONDS + 's.');
+}
 
 //Prompts user for STEAM_KEY to use for this session
-var makeSteamKey = function() {
+function makeSteamKey() {
   var rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
@@ -45,10 +63,10 @@ var makeSteamKey = function() {
       resolve(data);
     });
   });
-};
+}
 
-var checkDirExists = function(dir) {
+function checkDirExists(dir) {
   return fs.statAsync(dir).catch(function() {
     fs.mkdir(dir);
   });
-};
+}
