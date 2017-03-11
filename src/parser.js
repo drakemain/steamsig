@@ -106,17 +106,19 @@ function getAge(dateCreated) {
   var today = new Date();
   var years = today.getFullYear() - dateCreated.getFullYear();
   var months = today.getMonth() - dateCreated.getMonth();
+  var age = '';
 
   if (months < 0 || (months === 0 && today.getDate() < dateCreated.getDate())) {
     years--;
-    months += 12;
+    months += 11;
   }
 
-  var age = years.toString();
+  age = years.toString();
+
   if (months !== 0) {
-    age += '.' +
-      (months / 12).toString().substr(2, 2);
+    age += '.' + (months / 12).toString().substr(2, 2);
   }
+
   age += " years";
 
   return age;
