@@ -1,0 +1,1 @@
+rm assets/profiles/*/steam.JSON
