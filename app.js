@@ -25,7 +25,7 @@ console.log("--App started listening on port", process.env.PORT + '.');
 
 // Don't execute any routes unless there is a steam key.
 app.use(function(req, res, next) {
-  if (!process.env.STEAM_KEY) {
+  if (!process.env.STEAM_API_KEY) {
     res.render('error', {
       message: 'Steamsig is currently down.'
     });

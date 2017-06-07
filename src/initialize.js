@@ -14,12 +14,12 @@ module.exports = function(){
   });
 };
 
-//ensures STEAM_KEY has been set, otherwise prompts for STEAM_KEY
+//ensures STEAM_API_KEY has been set, otherwise prompts for STEAM_API_KEY
 function steamKeyCheck() {
-  if (!process.env.STEAM_KEY) {
+  if (!process.env.STEAM_API_KEY) {
     return makeSteamKey()
     .then(function(key) {
-      process.env.STEAM_KEY = key;
+      process.env.STEAM_API_KEY = key;
       console.log("Your key has been set for this session.");
     });
   }
@@ -41,7 +41,7 @@ function setSteamCacheExpireTime() {
   console.log('Steam cache expire time is', process.env.STEAM_CACHE_EXPIRE_SECONDS + 's.');
 }
 
-//Prompts user for STEAM_KEY to use for this session
+//Prompts user for STEAM_API_KEY to use for this session
 function makeSteamKey() {
   var rl = readline.createInterface({
     input: process.stdin,
@@ -50,7 +50,7 @@ function makeSteamKey() {
 
   console.log("...Steam API Key not found!\n" +
     "\n!!You can paste your steam key into the prompt and it will be used for this session only." +
-    " To save a key, add 'STEAM_KEY=[KEY]' to /config/.env.\n" + 
+    " To save a key, add 'STEAM_API_KEY=[KEY]' to /config/.env.\n" + 
     "If you don't have a key, get one at https://steamcommunity.com/dev.");
   rl.setPrompt("Enter your Steam API key:");
   rl.prompt();

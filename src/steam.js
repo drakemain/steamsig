@@ -5,7 +5,7 @@ var SteamSigError = require('./error');
 
 var call = exports.call = function(uri) {
   return new Promise(function(resolve, reject) {
-    request({uri: uri, timeout:4000}, function(err, res, body) {
+    request({uri: uri, timeout:process.env.STEAM_WAIT}, function(err, res, body) {
       if (!err) {
         var userData = JSON.parse(body);
 
@@ -14,8 +14,10 @@ var call = exports.call = function(uri) {
     })
     .on('error', function(err) {
       if (err.code === "ETIMEDOUT") {
+        console.Error("Steam Call Timeout!");
         reject(new SteamSigError.TimeOut(uri));
       } else {
+        console.Error("Some Other Request Error!");
         reject(err);
       }
     });
@@ -24,7 +26,7 @@ var call = exports.call = function(uri) {
 
 var buildRequest = exports.buildRequest = function(method, ID) {
   var URI = "https://api.steampowered.com/"
-    + method + "/?key=" + process.env.STEAM_KEY;
+    + method + "/?key=" + process.env.STEAM_API_KEY;
 
   if (method === "ISteamUser/GetPlayerSummaries/v0002") {
     URI += "&steamids=";
