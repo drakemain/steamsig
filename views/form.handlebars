@@ -3,7 +3,6 @@
 <p>
   <form action='/profile' method='post'>
     <p>
-
       {{#if messages}}
       <div name="messages" style="color: #0900C4; 12pt; border: 1px solid black;">
         <ul>
@@ -16,7 +15,8 @@
 
       <div>
         Enter your Steam ID or custom name:<br>
-        <input type='text' name='steamid' value="{{{steamIDInputValue}}}" autofocus><br>
+        <input type='text' id="uinput" oninput="validateSteamIdPattern()" name='steamid' value="{{{steamIDInputValue}}}" autofocus>
+        <div id="inputfeedback" style="display:none; 12pt;"></div>
       </div>
 
       NOTE: custom name is the name that appears at the end of your URL.<br>
@@ -36,7 +36,9 @@
 
     <ul>Updates:
       <li>March 8, 2017: Optimizations, refactoring, and toggleable
-      sig elements! Technically most customization options are currently possible (like background color, image size, and element placement). All that is needed is the ability to collect that data from the web form and pass it into my renderer. Work in progress!</li> 
+      sig elements! Technically most customization options are currently possible (like background color, image size, and 
+      element placement). All that is needed is the ability to collect that data from the web form and pass it into my renderer. 
+      Work in progress!</li> 
       <li>February 17, 2017: Profiles can only update once every 10 seconds. Render error pages instead of sending text.
       <li>December 13, 2016: Some behind the scenes changes to prep for customization</li>
       <li>November 4, 2016: Brand new renderer using Canvas!</li>
@@ -47,3 +49,28 @@
     </ul>
   </form>
 </p>
+
+
+<script>
+function validateSteamIdPattern() {
+  var input = document.getElementById("uinput").value;
+  var feedbackDiv = document.getElementById("inputfeedback");
+  
+  if (input === "") {
+    feedbackDiv.style.display = "none";
+
+  } else if (input.substr(0,7) !== "7656119"
+    || input.length !== 17
+    || isNaN(input.substr(8,16))) {
+
+    feedbackDiv.innerHTML = "Not a valid Steam ID. Submission will be treated as a custom name.";
+    feedbackDiv.style.display = "inline";
+    feedbackDiv.style.color = "blue";
+
+  } else {
+    feedbackDiv.innerHTML = "Valid Steam ID!";
+    feedbackDiv.style.display = "inline";
+    feedbackDiv.style.color = "green";
+  }
+}
+</script>
