@@ -14,10 +14,10 @@ var call = exports.call = function(uri) {
     })
     .on('error', function(err) {
       if (err.code === "ETIMEDOUT") {
-        console.Error("Steam Call Timeout!");
+        console.error("Steam Call Timeout!");
         reject(new SteamSigError.TimeOut(uri));
       } else {
-        console.Error("Some Other Request Error!");
+        console.error("Some Other Request Error!");
         reject(err);
       }
     });

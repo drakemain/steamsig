@@ -52,7 +52,7 @@ exports.refresh = function(_steamid) {
   .catch(SteamSigError.FileDNE, function(err) {
     var canvasPath = path.join('assets', 'profiles', steamid, 'canvas.JSON');
     var steamPath = path.join('assets', 'profiles', steamid, 'steam.JSON');
-    
+
     if (err.filePath === canvasPath) {
       console.log('Caught canvas data DNE');
 
@@ -63,7 +63,11 @@ exports.refresh = function(_steamid) {
 
       return buildSteamCache()
 
-      .then(updateSteamProfile);
+      .then(updateSteamProfile)
+
+      .catch(function(err) {
+        console.error(err);
+      });
     }
   });
 };
@@ -88,10 +92,20 @@ exports.setCanvas = function(canvasData) {
 
 exports.getDir = function(_steamid) {
   return path.join('assets', 'profiles', _steamid);
-}; 
+};
+
+exports.getCachedSigPath = function(_steamid) {
+  steamid = _steamid;
+
+  return getUserDirectory()
+
+  .then(function(userDir) {    
+    return validate.checkFileExists(path.join(userDir, 'sig.png'));
+  });
+}
 
 function compileCanvasData(data) {
-  var dataTemplate = getCanvasData();
+  var dataTemplate = makeCanvasTemplate();
 
   if (data._steamid) {
     data.steamid = data._steamid;
@@ -173,6 +187,7 @@ function buildSteamCache() {
   console.time("|>Get User Data");
 
   return steam.call(steamAPIRequest)
+
   .then(function(responseData) {
     console.timeEnd("|>Get User Data");
     
@@ -291,7 +306,7 @@ function getUserDirectory() {
 }
 
 // temporary until web form is implemented
-function getCanvasData() {
+function makeCanvasTemplate() {
   var thisCanvas = {};
 
   thisCanvas.elements = {

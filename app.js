@@ -101,7 +101,7 @@ app.post('/profile', function(req, res) {
 });
 
 app.get('/profile/:user', function(req, res) {
-  console.log('Direct profile request:', req.params.user);
+  console.log('/profile/', req.params.user);
 
   if (validate.steamid(req.params.user)) {
     var steamid = req.params.user;
@@ -110,13 +110,10 @@ app.get('/profile/:user', function(req, res) {
     validate.checkFileExists(path.join(userDir, 'canvas.JSON'))
 
     .then(function() {
-      return profile.refresh(steamid);
-    })
-
-    .then(function() {
-      console.time('|>Send file');
-      res.status(200).type('png').sendFile(path.join(userDir, 'sig.png'));
-      console.timeEnd('|>Send file');
+      res.render('profileDisplay', {
+        title: '',
+        imgSrc: '/sig/' + steamid
+      });
     })
 
     .catch(SteamSigError.FileDNE, function(err) {
@@ -141,6 +138,7 @@ app.get('/profile/:user', function(req, res) {
         message: 'Something went wrong. :('
       });
     });
+
   } else {
     validate.checkForValidID(req.params.user)
 
@@ -160,6 +158,35 @@ app.get('/profile/:user', function(req, res) {
 
       renderNewProfileForm(res, formData);
     });
+  }
+});
+
+// should only return an image file
+app.get('/sig/:steamid', function(req, res) {
+  console.log('/sig/', req.params.steamid);
+
+  var steamid = req.params.steamid;
+
+  if (validate.steamid(steamid)) {
+    profile.refresh(steamid)
+
+    .then(function() {
+      var sigPath = path.join('assets', 'profiles', req.params.steamid, 'sig.png');
+      console.time('|>Send file');
+      res.status(200).type('png').sendFile(path.resolve(sigPath));
+      console.timeEnd('|>Send file');
+    })
+
+    .catch(SteamSigError.FileDNE, function(err) {
+      console.error(err.message);
+
+      var dneImage = path.join('assets', 'img', 'dne.png');
+      res.type('png').sendFile(path.resolve(dneImage));
+    });
+  } else {
+    console.error('/sig called with invalid Steam ID');
+    var badSteamidImg = path.join('assets', 'img', 'bad-steamid.png');
+    res.type('png').sendFile(path.resolve(badSteamidImg));
   }
 });
 
